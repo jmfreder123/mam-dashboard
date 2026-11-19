@@ -177,6 +177,8 @@ The decisions behind these choices are numbered D063 to D074 in the database's d
 - `codebook.html`: what every variable means, how it was built, its source and the decision behind it
 - `data/`: the five data files above
 
+The page loads `style.css`, `app.js` and `dl.js` with a version tag (`?v=...`). Change the tag whenever one of those files changes, so browsers fetch the new copy instead of an old saved one.
+
 To view it on your own computer, serve the folder (for example `python3 -m http.server`) and open the local address. Opening `index.html` directly from disk will not load the data.
 
 Draft. Built by John M. Fredericks, Arizona State University.
