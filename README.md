@@ -62,6 +62,23 @@ Limits to know:
 - **Mississippi base:** the FY26 base of $6,842.61 comes from George County School District's FY26 budget hearing (July 29, 2025). It has not yet been confirmed in an MDE document.
 - **Census figures:** they describe everyone living in a district, not enrolled students.
 
+## Downloads
+
+The Download the data section at the bottom of the page (also reached from the Download data button at the top) lets anyone pick:
+
+- **Data:** the indicators, the funding inputs, their own results, or the map boundaries.
+- **State:** Mississippi, Tennessee or both.
+- **File type:** CSV, Excel (.xlsx), Stata (.dta, format 118 for Stata 14 or later) or JSON. Map boundaries come as GeoJSON only.
+
+Every file is built in the browser from the files in `data/`. Nothing is sent anywhere.
+
+- **Indicators:** the columns of `data/indicators.csv` plus `foodkids_est` and `foodkids_moe` from `data/food.csv`. The CSV keeps the numbers exactly as they are written in those files.
+- **Funding inputs:** the columns of `data/districts.csv` plus the funding rules in law for each state (formula, year, base amount, poverty weight, concentrated poverty weight and line).
+- **Your results:** for each district, the value, scaled value and weight of each chosen indicator, the scaling method, the index, rank now, rank under the index, places moved, students counted now and after re-sharing, poverty-weight dollars now and after, and the change in total and per student. With both states, each state is still ranked on its own.
+- **Map boundaries:** the features of `data/map.geojson` for the chosen state.
+
+The Excel, Stata and JSON files also say what each variable means and carry notes on the sources. In Stata, type `notes` to see them.
+
 ## Districts
 
 There are 277 districts: the school systems each state's formula pays.
@@ -142,6 +159,7 @@ The decisions behind these choices are numbered D063 to D073 in the database's d
 ## Files
 
 - `index.html`, `style.css`, `app.js`: the page
+- `dl.js`: the downloads (CSV, Excel, Stata and JSON writers)
 - `data/`: the four data files above
 
 To view it on your own computer, serve the folder (for example `python3 -m http.server`) and open the local address. Opening `index.html` directly from disk will not load the data.

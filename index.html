@@ -22,7 +22,10 @@
     <button type="button" class="seg" id="st-TN" role="radio" aria-checked="false" data-state="TN">Tennessee</button>
   </div>
   <nav aria-label="Steps"><ol id="stepper"></ol></nav>
-  <button type="button" class="ghost small" id="resetBtn">Start over</button>
+  <div class="barbtns">
+    <button type="button" class="ghost small" id="dataBtn">Download data</button>
+    <button type="button" class="ghost small" id="resetBtn">Start over</button>
+  </div>
 </div>
 
 <main class="wrap layout">
@@ -147,11 +150,50 @@
   </aside>
 </main>
 
+<section class="wrap" id="data" aria-labelledby="dataTitle">
+  <div class="panel datapanel">
+    <h2 id="dataTitle" tabindex="-1">Download the data</h2>
+    <p>Choose the data, the state and the file type. The files hold the same numbers this page uses. The <a href="https://github.com/jmfreder123/mam-dashboard#readme">README</a> lists every source and file fingerprint.</p>
+    <div class="dlgrid">
+      <fieldset class="choices">
+        <legend>Data</legend>
+        <label class="choice"><input type="radio" name="dlWhat" value="indicators" checked>
+          <span><strong>Indicators.</strong> All 18 indicators for each district, with margins of error.</span></label>
+        <label class="choice"><input type="radio" name="dlWhat" value="funding">
+          <span><strong>Funding inputs.</strong> K-12 enrollment, who the state counts now, and the funding rules in law.</span></label>
+        <label class="choice"><input type="radio" name="dlWhat" value="results">
+          <span><strong>Your results.</strong> Your index, ranks, re-shared counts and dollars, with your choices.</span></label>
+        <label class="choice"><input type="radio" name="dlWhat" value="map">
+          <span><strong>Map boundaries.</strong> The district shapes used on the map.</span></label>
+      </fieldset>
+      <fieldset class="choices">
+        <legend>State</legend>
+        <label class="choice"><input type="radio" name="dlState" value="MS"><span>Mississippi</span></label>
+        <label class="choice"><input type="radio" name="dlState" value="TN"><span>Tennessee</span></label>
+        <label class="choice"><input type="radio" name="dlState" value="both" checked><span>Both states</span></label>
+      </fieldset>
+      <fieldset class="choices">
+        <legend>File type</legend>
+        <label class="choice"><input type="radio" name="dlFormat" value="csv" checked><span>CSV</span></label>
+        <label class="choice"><input type="radio" name="dlFormat" value="xlsx"><span>Excel (.xlsx)</span></label>
+        <label class="choice"><input type="radio" name="dlFormat" value="dta"><span>Stata (.dta)</span></label>
+        <label class="choice"><input type="radio" name="dlFormat" value="json" id="dl-json"><span id="dl-json-label">JSON</span></label>
+      </fieldset>
+    </div>
+    <p class="muted" id="dlNote" aria-live="polite"></p>
+    <div class="row">
+      <button type="button" id="dlBtn">Download</button>
+      <p class="muted small" id="dlDone" aria-live="polite"></p>
+    </div>
+  </div>
+</section>
+
 <footer class="wrap foot">
   <p>Data: U.S. Census Bureau, American Community Survey 2020–2024 5-year estimates; USDA ERS SNAP-Authorized Retailer Access Map (July 2026 release); TDOE district profile 2024-25; MDE enrollment 2024-25 and Office of Child Nutrition CEP list (April 14, 2025); NCES Common Core of Data 2024-25 directory; Census TIGER/Line 2024 school district boundaries. Census figures describe everyone living in each district, not enrolled students. See the <a href="https://github.com/jmfreder123/mam-dashboard#readme">README</a> for sources, file fingerprints and method.</p>
   <p>Draft. Built by John M. Fredericks, Arizona State University.</p>
 </footer>
 
 <script src="app.js"></script>
+<script src="dl.js"></script>
 </body>
 </html>

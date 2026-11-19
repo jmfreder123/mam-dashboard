@@ -142,6 +142,14 @@ ol.ranklist .mv { font-variant-numeric: tabular-nums; font-weight: 700; white-sp
 ol.ranklist .mv.same { color: var(--soft); font-weight: 400; }
 ol.ranklist li.hl { background: var(--warn-bg); }
 ol.ranklist li.empty { display: block; color: var(--soft); }
+.barbtns { display: flex; gap: 8px; flex-wrap: wrap; }
+.datapanel { margin-top: 8px; }
+.datapanel h2:focus { outline: none; }
+.dlgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px 20px; }
+.dlgrid legend { font-weight: 700; padding: 0; margin-bottom: 4px; }
+.dlgrid .choices { margin: 8px 0; gap: 8px; align-content: start; }
+.choice.off { opacity: .45; cursor: not-allowed; }
+#dlDone { margin: 0; }
 .foot { color: var(--soft); font-size: 14px; padding-bottom: 32px; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 

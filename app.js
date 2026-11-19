@@ -47,6 +47,7 @@
   var STEPS = ["The task", "Indicators", "Weights", "Scaling", "Money", "Reflect"];
   var STORE = "mam-dashboard-v1";
   var DATA = { MS: [], TN: [] };
+  var RAW = {}; // the data files as loaded, kept for downloads
   var FEATURES = {};
   var state = { st: "MS", step: 0, picked: [], weights: {}, weightsTouched: false, scale: "rank", answers: ["", "", ""], view: "index" };
 
@@ -226,6 +227,8 @@
     var rank = rankDesc(index);
     var cnt = reshare(R, index);
     out.forEach(function (o, i) {
+      o.scaled = {};
+      state.picked.forEach(function (c) { o.scaled[c] = scaled[c][i]; });
       o.index = index[i]; o.rank = rank[i];
       o.newCount = cnt[i];
       o.newDollars = dollars(law, cnt[i], o.r.enroll);
@@ -630,6 +633,14 @@
     if (state.step === 5) renderReflect();
     updateLive();
     save();
+    document.dispatchEvent(new CustomEvent("mam:update"));
+  }
+
+  // results for either state, for downloads; the page's own state is left as it was
+  function resultsFor(st) {
+    var keep = state.st;
+    state.st = st;
+    try { return results(); } finally { state.st = keep; }
   }
 
   function wire() {
@@ -676,17 +687,22 @@
     fetch("data/map.geojson").then(function (r) { return r.json(); }),
     fetch("data/food.csv").then(function (r) { return r.text(); })
   ]).then(function (x) {
-    build(parseCSV(x[0]), parseCSV(x[1]), parseCSV(x[3]));
+    RAW.dist = parseCSV(x[0]); RAW.ind = parseCSV(x[1]); RAW.food = parseCSV(x[3]); RAW.map = x[2];
+    build(RAW.dist, RAW.ind, RAW.food);
     FEATURES.MS = x[2].features.filter(function (f) { return f.properties.leaid.slice(0, 2) === "28"; });
     FEATURES.TN = x[2].features.filter(function (f) { return f.properties.leaid.slice(0, 2) === "47"; });
     load();
     wire();
     buildMap();
     update();
+    document.dispatchEvent(new CustomEvent("mam:ready"));
   }).catch(function (e) {
     document.querySelector("main").insertAdjacentHTML("afterbegin", "<div class=\"warn\"><p>The data files could not be loaded. Open this page from its web address, not from a file on your computer.</p></div>");
     console.error(e);
   });
 
-  window.__mam = { results: results, reshare: reshare, state: function () { return state; }, data: DATA, LAW: LAW };
+  window.__mam = {
+    results: results, resultsFor: resultsFor, reshare: reshare, ready: ready, weightsNow: weightsNow,
+    state: function () { return state; }, data: DATA, raw: RAW, LAW: LAW, IND: IND, BY: BY
+  };
 })();
