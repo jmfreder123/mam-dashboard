@@ -463,14 +463,15 @@
     var full = what === "indicators" ? indicatorsData(sel) : what === "funding" ? fundingData(sel) : resultsData(sel);
     var ds = applyCols(what, full);
     renderCols(what, full, ds);
-    note.textContent = ds.rows.length + " districts and " + ds.cols.length + " columns. Hover over a column name to see what it means. Scroll sideways to see every column.";
+    note.textContent = ds.rows.length + " districts and " + ds.cols.length + " columns. Under each heading, in small type, is that column's name in the downloaded file. Scroll sideways to see every column.";
     var t = document.createElement("table"), thead = document.createElement("thead"), hr = document.createElement("tr");
     ds.cols.forEach(function (c) {
       var th = document.createElement("th");
-      th.textContent = c.name; th.title = c.label;
       if (c.type === "num") th.className = "n";
-      var sub = document.createElement("span"); sub.className = "lab"; sub.textContent = c.label;
-      th.appendChild(sub);
+      var main = document.createElement("span"); main.className = "lab"; main.textContent = c.label;
+      var code = document.createElement("span"); code.className = "code"; code.textContent = c.name;
+      code.title = "Column name in the downloaded file";
+      th.appendChild(main); th.appendChild(code);
       hr.appendChild(th);
     });
     thead.appendChild(hr); t.appendChild(thead);
