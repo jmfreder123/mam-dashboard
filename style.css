@@ -78,6 +78,11 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
 .domain { margin-top: 18px; }
 .domain h3 { margin: 0 0 8px; padding-bottom: 4px; border-bottom: 2px solid var(--rule); }
+.dtoggle { font: inherit; font-weight: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; display: flex; align-items: baseline; gap: 6px; width: 100%; }
+.dtoggle:hover { color: var(--accent); }
+.dtoggle .chev { font-size: 14px; width: 14px; flex: none; color: var(--soft); }
+.cards[hidden] { display: none; }
+.dpicked { font-size: 14px; color: var(--soft); margin: -2px 0 0 20px; }
 .domain .dcount { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; font-size: 13px; font-weight: 400; color: var(--soft); margin-left: 6px; }
 .card { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--rule); padding: 12px; cursor: pointer; background: #FFF; }
 .card input { margin-top: 4px; accent-color: var(--accent); width: 18px; height: 18px; flex: none; }

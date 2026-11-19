@@ -271,6 +271,7 @@
     $("nextBtn").disabled = hint !== "";
   }
 
+  var closedDomains = {};   // domains the user has closed on the indicators step
   function renderCards() {
     var box = $("indicatorCards"); box.innerHTML = "";
     var n = state.picked.length;
@@ -280,9 +281,20 @@
       var sec = el("div", { class: "domain" });
       var n = IND.filter(function (d) { return d.domain === g.key; }).length;
       var k = IND.filter(function (d) { return d.domain === g.key && state.picked.indexOf(d.code) >= 0; }).length;
-      sec.appendChild(el("h3", null, g.label + " "));
-      sec.lastChild.appendChild(el("span", { class: "dcount" }, k + " of " + n + " picked"));
-      var cards = el("div", { class: "cards" });
+      // each domain opens and closes; closed domains list what is picked in them
+      var closed = !!closedDomains[g.key];
+      var h = el("h3"), tb = el("button", { type: "button", class: "dtoggle", "aria-expanded": String(!closed), "aria-controls": "dom-" + g.key });
+      tb.appendChild(el("span", { class: "chev", "aria-hidden": "true" }, closed ? "\u25B8" : "\u25BE"));
+      tb.appendChild(document.createTextNode(g.label + " "));
+      tb.appendChild(el("span", { class: "dcount" }, k + " of " + n + " picked"));
+      tb.addEventListener("click", function () { closedDomains[g.key] = !closedDomains[g.key]; renderCards(); });
+      h.appendChild(tb); sec.appendChild(h);
+      var cards = el("div", { class: "cards", id: "dom-" + g.key });
+      if (closed) {
+        cards.hidden = true;
+        var names = IND.filter(function (d) { return d.domain === g.key && state.picked.indexOf(d.code) >= 0; }).map(function (d) { return d.label; });
+        if (names.length) sec.appendChild(el("p", { class: "dpicked" }, "Picked: " + names.join(", ")));
+      }
       sec.appendChild(cards);
       box.appendChild(sec);
       groups[g.key] = cards;
