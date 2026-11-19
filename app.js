@@ -474,9 +474,7 @@
     var s = (W - 2 * PAD) / (maxX - minX);
     var H = Math.round((maxY - minY) * s + 2 * PAD);
     var svg = $("map");
-    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
-    svg.setAttribute("data-base", "0 0 " + W + " " + H);
-    setVB([0, 0, W, H]);
+    svg.setAttribute("data-natural", W + " " + H);
     svg.innerHTML = "";
     var idx = {};
     rows().forEach(function (r, i) { idx[r.leaid] = i; });
@@ -498,6 +496,8 @@
       svg.appendChild(path);
       projected[f.properties.leaid] = path;
     });
+    atHome = true;
+    sizeMap(true);
     if (focusId && projected[focusId]) { markMap(); setVB(zoomBox(focusId)); } else focusId = null;
   }
 
@@ -591,8 +591,50 @@
   function baseVB() { var v = $("map").getAttribute("data-base").split(" ").map(Number); return v; }
   function clampVB(v) {
     var base = baseVB(), w = Math.min(base[2], Math.max(base[2] / 16, v[2])), h = w * base[3] / base[2];
-    var x = Math.max(0, Math.min(base[2] - w, v[0])), y = Math.max(0, Math.min(base[3] - h, v[1]));
+    var x = Math.max(base[0], Math.min(base[0] + base[2] - w, v[0])), y = Math.max(base[1], Math.min(base[1] + base[3] - h, v[1]));
     return [x, y, w, h];
+  }
+
+  // The map box can be made taller or shorter by dragging the handle under it.
+  // mapH holds each state's chosen height in pixels (null = the state's own shape).
+  var mapH = { MS: null, TN: null };
+  var atHome = true;   // the map shows its starting view (not zoomed or moved by the user)
+  function naturalSize() { return $("map").getAttribute("data-natural").split(" ").map(Number); }
+  function sizeMap(reset) {
+    var box = $("map").parentNode, nat = naturalSize(), bw = box.clientWidth || 1;
+    var natH = bw * nat[1] / nat[0];
+    var h = mapH[state.st] ? mapH[state.st] : natH;
+    box.style.height = Math.round(h) + "px";
+    // the full-state view: the state's own box, widened or heightened to fill the map box
+    var a = bw / h, base;
+    if (a < nat[0] / nat[1]) { var bh = nat[0] / a; base = [0, -(bh - nat[1]) / 2, nat[0], bh]; }
+    else { var w2 = nat[1] * a; base = [-(w2 - nat[0]) / 2, 0, w2, nat[1]]; }
+    var old = $("map").getAttribute("data-base");
+    var userHome = atHome;
+    var wasZoomed = !reset && vbNow && old && vbNow[2] < Number(old.split(" ")[2]) - 0.5 && !userHome;
+    $("map").setAttribute("data-base", base.join(" "));
+    if (wasZoomed) {
+      var cx = vbNow[0] + vbNow[2] / 2, cy = vbNow[1] + vbNow[3] / 2, w = vbNow[2], hh = w * base[3] / base[2];
+      setVB(clampVB([cx - w / 2, cy - hh / 2, w, hh]));
+    } else setVB(homeVB());
+    $("mapHandle").setAttribute("aria-valuenow", String(Math.round(h)));
+    stickyCheck();
+  }
+  // The starting view. When the box is taller than the state's own shape (Tennessee
+  // dragged taller), the state fills the box's height and can be dragged sideways,
+  // so a taller box shows a bigger map instead of empty space.
+  function homeVB() {
+    var base = baseVB(), nat = naturalSize();
+    if (mapH[state.st] && base[1] < 0) {
+      var w = nat[1] * base[2] / base[3];
+      return clampVB([(nat[0] - w) / 2, 0, w, nat[1]]);
+    }
+    return base.slice();
+  }
+  // the live panel only stays in view while scrolling if it fits on the screen
+  function stickyCheck() {
+    var live = document.querySelector(".live");
+    live.classList.toggle("nosticky", live.offsetHeight > window.innerHeight - 24);
   }
   function setVB(v) {
     vbNow = v;
@@ -605,6 +647,7 @@
   }
   // + and - buttons: zoom around the middle of what is shown now
   function zoomBy(f) {
+    atHome = false;
     var v = vbNow || baseVB(), w = v[2] / f, h = v[3] / f;
     animateVB(clampVB([v[0] + (v[2] - w) / 2, v[1] + (v[3] - h) / 2, w, h]));
   }
@@ -635,8 +678,7 @@
     if (w / h > aspect) h = w / aspect; else w = h * aspect;
     if (w > base[2]) { w = base[2]; h = base[3]; }
     var cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
-    var x = Math.max(0, Math.min(base[2] - w, cx - w / 2)), y = Math.max(0, Math.min(base[3] - h, cy - h / 2));
-    return [x, y, w, h];
+    return clampVB([cx - w / 2, cy - h / 2, w, h]);
   }
   function markMap() {
     document.querySelectorAll("#map path.focus, #map path.nbr").forEach(function (p) { p.classList.remove("focus"); p.classList.remove("nbr"); });
@@ -649,6 +691,7 @@
   function focusDistrict(leaid, instant) {
     if (!projected[leaid]) return;
     focusId = leaid;
+    atHome = false;
     hideTip();
     markMap();
     var box = zoomBox(leaid);
@@ -659,6 +702,7 @@
     focusId = null;
     markMap();
     animateVB(baseVB());
+    atHome = false;
     renderDistPanel();
   }
 
@@ -869,6 +913,7 @@
     if (state.view === "rank") { hideTip(); renderRanks(res); }
     if (state.step === 4) renderMoney(res);
     document.dispatchEvent(new CustomEvent("mam:update"));
+    stickyCheck();
     return res;
   }
   function update() {
@@ -897,7 +942,7 @@
       });
     });
     ["index", "money", "rank"].forEach(function (v) {
-      $("mv-" + v).addEventListener("click", function () { state.view = v; updateLive(); save(); });
+      $("mv-" + v).addEventListener("click", function () { state.view = v; updateLive(); if (v !== "rank") sizeMap(false); save(); });
     });
     ["rankNow", "rankYours"].forEach(function (id) {
       $(id).addEventListener("mouseover", function (e) { var x = e.target.closest("li"); highlight(x && x.getAttribute("data-leaid")); });
@@ -925,7 +970,7 @@
       var st = state.st;
       state = { st: st, step: 0, picked: [], weights: {}, weightsTouched: false, scale: "rank", view: "index" };
       sortKey = "rank"; sortDir = 1;
-      closeDistrictPage(); focusId = null; markMap(); setVB(baseVB());
+      closeDistrictPage(); focusId = null; markMap(); setVB(homeVB()); atHome = true;
       update();
     });
     var svg = $("map");
@@ -940,7 +985,7 @@
       if (!drag || e.pointerId !== drag.id) return;
       var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
       if (!dragged && Math.abs(dx) + Math.abs(dy) < 5) return;
-      if (!dragged) { dragged = true; svg.setPointerCapture(e.pointerId); svg.classList.add("dragging"); hideTip(); if (vbAnim) { cancelAnimationFrame(vbAnim); vbAnim = null; } }
+      if (!dragged) { dragged = true; atHome = false; svg.setPointerCapture(e.pointerId); svg.classList.add("dragging"); hideTip(); if (vbAnim) { cancelAnimationFrame(vbAnim); vbAnim = null; } }
       var k = drag.v[2] / svg.clientWidth;
       setVB(clampVB([drag.v[0] - dx * k, drag.v[1] - dy * k, drag.v[2], drag.v[3]]));
     });
@@ -954,7 +999,8 @@
     svg.addEventListener("click", function (e) { if (dragged) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
     $("zoomIn").addEventListener("click", function () { zoomBy(1.6); });
     $("zoomOut").addEventListener("click", function () { zoomBy(1 / 1.6); });
-    $("zoomAll").addEventListener("click", function () { if (focusId) clearFocus(); else animateVB(baseVB()); });
+    // Whole state always fits the full state in the box (with space around it when the box is tall)
+    $("zoomAll").addEventListener("click", function () { if (focusId) clearFocus(); else { animateVB(baseVB()); atHome = false; } });
     svg.addEventListener("mousemove", function (e) { if (drag && dragged) return; if (e.target.tagName === "path") showTip(e.target, e); });
     svg.addEventListener("mouseleave", hideTip);
     svg.addEventListener("click", function (e) {
@@ -970,6 +1016,27 @@
       }
     });
     window.addEventListener("hashchange", showDistrictFromHash);
+    var hd = $("mapHandle"), hdrag = null;
+    function maxH() { return Math.max(320, Math.round(window.innerHeight * 0.9)); }
+    function setH(h) { mapH[state.st] = Math.max(140, Math.min(maxH(), Math.round(h))); hideTip(); sizeMap(false); }
+    hd.addEventListener("pointerdown", function (e) {
+      if (e.button !== 0) return;
+      hdrag = { y: e.clientY, h: $("map").parentNode.clientHeight, id: e.pointerId };
+      hd.setPointerCapture(e.pointerId); hd.classList.add("dragging"); e.preventDefault();
+    });
+    hd.addEventListener("pointermove", function (e) { if (hdrag && e.pointerId === hdrag.id) setH(hdrag.h + e.clientY - hdrag.y); });
+    function hEnd() { hdrag = null; hd.classList.remove("dragging"); }
+    hd.addEventListener("pointerup", hEnd);
+    hd.addEventListener("pointercancel", hEnd);
+    hd.addEventListener("dblclick", function () { mapH[state.st] = null; sizeMap(false); });
+    hd.addEventListener("keydown", function (e) {
+      var cur = $("map").parentNode.clientHeight;
+      if (e.key === "ArrowDown") { e.preventDefault(); setH(cur + 40); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); setH(cur - 40); }
+      else if (e.key === "Home") { e.preventDefault(); mapH[state.st] = null; sizeMap(false); }
+    });
+    var rz = null;
+    window.addEventListener("resize", function () { clearTimeout(rz); rz = setTimeout(function () { if ($("map").getAttribute("data-natural")) sizeMap(false); }, 120); });
     document.addEventListener("keydown", function (e) {
       if (e.key !== "Escape" || !focusId || pageId) return;
       if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;

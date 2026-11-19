@@ -124,12 +124,17 @@ details.how ol { padding-left: 22px; }
 .tablewrap td:first-child { min-width: 200px; }
 
 .maphead h2 { margin: 0; }
-.mapbox { position: relative; margin-top: 10px; }
-#map { width: 100%; height: auto; display: block; }
+.mapbox { position: relative; margin-top: 10px; overflow: hidden; }
+#map { width: 100%; height: 100%; display: block; }
 #map path { stroke: var(--edge); stroke-width: .6; cursor: pointer; }
 #map path:hover, #map path.sel { stroke: var(--ink); stroke-width: 1.6; }
 #map.zoomed { cursor: grab; touch-action: none; }
 #map.dragging { cursor: grabbing; }
+.maphandle { height: 16px; margin-top: 2px; cursor: ns-resize; display: flex; align-items: center; justify-content: center; touch-action: none; border-top: 1px solid var(--rule); }
+.maphandle span { width: 44px; height: 5px; border-radius: 3px; background: var(--rule); }
+.maphandle:hover span, .maphandle.dragging span { background: var(--accent); }
+.maphandle:focus-visible { outline: 3px solid var(--good); outline-offset: 2px; }
+.live.nosticky { position: static; }
 .zoomrow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
 .zoomctl { display: flex; gap: 4px; }
 .zoomctl button { font: inherit; font-size: 18px; font-weight: 700; line-height: 1; width: 32px; height: 32px; padding: 0; border: 1px solid var(--rule); background: var(--panel); color: var(--ink); }
