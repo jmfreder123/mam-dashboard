@@ -44,12 +44,12 @@
           who: "low-income", measure: "Identified students for school meals (MDE CEP list, April 14, 2025)" }
   };
 
-  var STEPS = ["The task", "Indicators", "Weights", "Scaling", "Money", "Reflect"];
+  var STEPS = ["How it works", "Indicators", "Weights", "Scaling", "Money"];
   var STORE = "mam-dashboard-v1";
   var DATA = { MS: [], TN: [] };
   var RAW = {}; // the data files as loaded, kept for downloads
   var FEATURES = {};
-  var state = { st: "MS", step: 0, picked: [], weights: {}, weightsTouched: false, scale: "rank", answers: ["", "", ""], view: "index" };
+  var state = { st: "MS", step: 0, picked: [], weights: {}, weightsTouched: false, scale: "rank", view: "index" };
 
   function $(id) { return document.getElementById(id); }
   function el(tag, attrs, text) {
@@ -65,6 +65,8 @@
       if (s && typeof s === "object") Object.keys(state).forEach(function (k) { if (k in s) state[k] = s[k]; });
     } catch (e) { /* storage unavailable */ }
     state.picked = state.picked.filter(function (c) { return BY[c]; });
+    delete state.answers;
+    state.step = Math.max(0, Math.min(Number(state.step) || 0, farthestStep()));
   }
 
   // ---------------------------------------------------------------------------
@@ -243,10 +245,13 @@
   // ---------------------------------------------------------------------------
   function renderStepper() {
     var ol = $("stepper"); ol.innerHTML = "";
+    var far = farthestStep();
     STEPS.forEach(function (s, i) {
-      var li = el("li", null, s);
-      if (i === state.step) { li.className = "now"; li.setAttribute("aria-current", "step"); }
-      else if (i < state.step) li.className = "done";
+      var li = el("li"), b = el("button", { type: "button", class: "stepbtn", "data-go": String(i) }, s);
+      if (i === state.step) { b.className += " now"; b.setAttribute("aria-current", "step"); }
+      else if (i < state.step) b.className += " done";
+      if (i > far) { b.disabled = true; b.title = i <= 2 || state.picked.length < 2 ? "Pick at least two indicators first." : "Your weights need to add up to 100 first."; }
+      li.appendChild(b);
       ol.appendChild(li);
     });
     document.querySelectorAll("[data-step]").forEach(function (p) { p.hidden = Number(p.getAttribute("data-step")) !== state.step; });
@@ -442,8 +447,11 @@
     });
   }
 
-  function renderReflect() {
-    ["q1", "q2", "q3"].forEach(function (id, i) { if ($(id).value !== state.answers[i]) $(id).value = state.answers[i] || ""; });
+  // the farthest step that can be opened: the same rules as the Next button
+  function farthestStep() {
+    if (state.picked.length < 2) return 1;
+    if (weightTotal() !== 100) return 2;
+    return STEPS.length - 1;
   }
 
   // ---------------------------------------------------------------------------
@@ -630,7 +638,6 @@
     if (state.step === 1) renderCards();
     if (state.step === 2) renderWeights();
     if (state.step === 3) renderScale();
-    if (state.step === 5) renderReflect();
     updateLive();
     save();
     document.dispatchEvent(new CustomEvent("mam:update"));
@@ -663,13 +670,18 @@
     document.querySelectorAll("input[name=scale]").forEach(function (x) {
       x.addEventListener("change", function () { state.scale = x.value; renderScale(); updateLive(); save(); });
     });
-    ["q1", "q2", "q3"].forEach(function (id, i) { $(id).addEventListener("input", function () { state.answers[i] = $(id).value; save(); }); });
+    $("stepper").addEventListener("click", function (e) {
+      var b = e.target.closest("button[data-go]");
+      if (!b || b.disabled) return;
+      var i = Number(b.getAttribute("data-go"));
+      if (i !== state.step && i <= farthestStep()) { state.step = i; update(); }
+    });
     var resetArmed = false;
     $("resetBtn").addEventListener("click", function () {
       if (!resetArmed) { resetArmed = true; $("resetBtn").textContent = "Click again to clear everything"; setTimeout(function () { resetArmed = false; $("resetBtn").textContent = "Start over"; }, 4000); return; }
       resetArmed = false; $("resetBtn").textContent = "Start over";
       var st = state.st;
-      state = { st: st, step: 0, picked: [], weights: {}, weightsTouched: false, scale: "rank", answers: ["", "", ""], view: "index" };
+      state = { st: st, step: 0, picked: [], weights: {}, weightsTouched: false, scale: "rank", view: "index" };
       sortKey = "rank"; sortDir = 1;
       update();
     });

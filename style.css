@@ -47,9 +47,11 @@ a { color: var(--good); }
 .seg-sm .seg { padding: 4px 10px; font-size: 14px; }
 .bar nav { flex: 1; min-width: 0; }
 .bar ol { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 6px; }
-.bar li { font-size: 14px; padding: 4px 10px; border: 1px solid var(--rule); border-radius: 999px; color: var(--soft); background: var(--panel); }
-.bar li.done { border-color: var(--good); color: var(--good); }
-.bar li.now { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.stepbtn { font: inherit; font-size: 14px; font-weight: 400; line-height: 1.4; padding: 4px 10px; border: 1px solid var(--rule); border-radius: 999px; color: var(--soft); background: var(--panel); cursor: pointer; }
+.stepbtn.done { border-color: var(--good); color: var(--good); }
+.stepbtn.now { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; cursor: default; }
+.stepbtn:hover:not(:disabled):not(.now) { border-color: var(--accent); color: var(--accent); }
+.stepbtn:disabled { opacity: .5; }
 
 .layout { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px; align-items: start; }
 .steps-col, .live { min-width: 0; }
@@ -145,10 +147,11 @@ ol.ranklist li.empty { display: block; color: var(--soft); }
 .barbtns { display: flex; gap: 8px; flex-wrap: wrap; }
 .datapanel { margin-top: 8px; }
 .datapanel h2:focus { outline: none; }
-.dlgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px 20px; }
-.dlgrid legend { font-weight: 700; padding: 0; margin-bottom: 4px; }
-.dlgrid .choices { margin: 8px 0; gap: 8px; align-content: start; }
-.choice.off { opacity: .45; cursor: not-allowed; }
+.dlgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px 20px; margin: 8px 0 4px; }
+.dlfield { display: block; font-weight: 700; }
+.dlfield select { display: block; width: 100%; margin-top: 6px; font: inherit; font-weight: 400; padding: 9px 10px; border: 1px solid var(--rule); background: #FFF; color: var(--ink); border-radius: 0; }
+.dlfield select:focus-visible { outline: 3px solid var(--good); outline-offset: 2px; }
+.dldesc { margin: 10px 0 4px; }
 #dlDone { margin: 0; }
 .foot { color: var(--soft); font-size: 14px; padding-bottom: 32px; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }

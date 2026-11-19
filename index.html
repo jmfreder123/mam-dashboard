@@ -33,13 +33,14 @@
 
     <!-- Step 0 -->
     <div class="panel" data-step="0">
-      <h2>The task</h2>
-      <p>Both states give school districts extra money for students in poverty. Tennessee's funding formula (TISA) adds 25 percent of the base amount for each economically disadvantaged student. Mississippi's formula (MSFF) adds 30 percent for each low-income student, plus 10 percent for low-income students above 35 percent of a district's enrollment.</p>
-      <p>Both states decide who counts mainly through direct certification: students whose families receive SNAP or TANF, plus students who are homeless, in foster care or migrant. Here you build a broader measure of need from census data, and see how the same poverty money would move if your measure decided which districts have the most need.</p>
+      <h2>How it works</h2>
+      <p>Both Mississippi and Tennessee give school districts extra money for students in poverty. Tennessee's funding formula (TISA) adds 25 percent of the base amount for each economically disadvantaged student. Mississippi's formula (MSFF) adds 30 percent for each low-income student, plus 10 percent for low-income students above 35 percent of a district's enrollment.</p>
+      <p>Both states decide who counts mainly through direct certification: students whose families receive SNAP or TANF, plus students who are homeless, in foster care or migrant. This dashboard tests a broader measure. It combines census and USDA data on each district into an index of need, then shows how the same poverty money would move if that index decided which districts have the most need.</p>
       <div class="callout">
         <p><strong>What stays fixed.</strong> Everything set in law: the base amount, the weights, and the state's total number of students who count. You choose only which kinds of need matter and how much.</p>
       </div>
-      <p class="muted">Each state is ranked on its own. Use the switch above to change states. About 15 minutes.</p>
+      <p>Choose indicators, weight them, pick a scaling method, and see where the money goes. The map and rankings update as you go.</p>
+      <p class="muted">Each state is ranked on its own. Use the switch above to change states. Downloads are at the bottom of the page, and sources and methods are in the README.</p>
     </div>
 
     <!-- Step 1 -->
@@ -103,18 +104,6 @@
       </details>
     </div>
 
-    <!-- Step 5 -->
-    <div class="panel" data-step="5" hidden>
-      <h2>Step 5. Reflect</h2>
-      <label class="field" for="q1">1. Which indicators did you choose, and why?
-        <textarea id="q1" rows="3"></textarea></label>
-      <label class="field" for="q2">2. Which districts gained the most under your index? What do they have in common?
-        <textarea id="q2" rows="3"></textarea></label>
-      <label class="field" for="q3">3. Which one decision changed the money the most?
-        <textarea id="q3" rows="3"></textarea></label>
-      <p class="muted">Your answers stay in this browser.</p>
-    </div>
-
     <div class="nav row between">
       <button type="button" class="ghost" id="backBtn">Back</button>
       <p class="hint" id="navHint" aria-live="polite"></p>
@@ -155,31 +144,31 @@
     <h2 id="dataTitle" tabindex="-1">Download the data</h2>
     <p>Choose the data, the state and the file type. The files hold the same numbers this page uses. The <a href="https://github.com/jmfreder123/mam-dashboard#readme">README</a> lists every source and file fingerprint.</p>
     <div class="dlgrid">
-      <fieldset class="choices">
-        <legend>Data</legend>
-        <label class="choice"><input type="radio" name="dlWhat" value="indicators" checked>
-          <span><strong>Indicators.</strong> All 18 indicators for each district, with margins of error.</span></label>
-        <label class="choice"><input type="radio" name="dlWhat" value="funding">
-          <span><strong>Funding inputs.</strong> K-12 enrollment, who the state counts now, and the funding rules in law.</span></label>
-        <label class="choice"><input type="radio" name="dlWhat" value="results">
-          <span><strong>Your results.</strong> Your index, ranks, re-shared counts and dollars, with your choices.</span></label>
-        <label class="choice"><input type="radio" name="dlWhat" value="map">
-          <span><strong>Map boundaries.</strong> The district shapes used on the map.</span></label>
-      </fieldset>
-      <fieldset class="choices">
-        <legend>State</legend>
-        <label class="choice"><input type="radio" name="dlState" value="MS"><span>Mississippi</span></label>
-        <label class="choice"><input type="radio" name="dlState" value="TN"><span>Tennessee</span></label>
-        <label class="choice"><input type="radio" name="dlState" value="both" checked><span>Both states</span></label>
-      </fieldset>
-      <fieldset class="choices">
-        <legend>File type</legend>
-        <label class="choice"><input type="radio" name="dlFormat" value="csv" checked><span>CSV</span></label>
-        <label class="choice"><input type="radio" name="dlFormat" value="xlsx"><span>Excel (.xlsx)</span></label>
-        <label class="choice"><input type="radio" name="dlFormat" value="dta"><span>Stata (.dta)</span></label>
-        <label class="choice"><input type="radio" name="dlFormat" value="json" id="dl-json"><span id="dl-json-label">JSON</span></label>
-      </fieldset>
+      <label class="dlfield" for="dlWhat">Data
+        <select id="dlWhat">
+          <option value="indicators" selected>Indicators</option>
+          <option value="funding">Funding inputs</option>
+          <option value="results">Your results</option>
+          <option value="map">Map boundaries</option>
+        </select>
+      </label>
+      <label class="dlfield" for="dlState">State
+        <select id="dlState">
+          <option value="MS">Mississippi</option>
+          <option value="TN">Tennessee</option>
+          <option value="both" selected>Both states</option>
+        </select>
+      </label>
+      <label class="dlfield" for="dlFormat">File type
+        <select id="dlFormat">
+          <option value="csv" selected>CSV</option>
+          <option value="xlsx">Excel (.xlsx)</option>
+          <option value="dta">Stata (.dta)</option>
+          <option value="json" id="dl-json">JSON</option>
+        </select>
+      </label>
     </div>
+    <p class="dldesc" id="dlDesc" aria-live="polite"></p>
     <p class="muted" id="dlNote" aria-live="polite"></p>
     <div class="row">
       <button type="button" id="dlBtn">Download</button>

@@ -6,13 +6,12 @@ It is a static page. Nothing is installed, and nothing a user enters leaves thei
 
 ## How it works
 
-Each state is ranked on its own. Users go through five steps:
+Each state is ranked on its own. Users go through four steps after a short introduction. Clicking a step's name at the top opens it, and a step opens only once the steps before it are complete (at least two indicators, and weights that add up to 100):
 
 1. **Indicators.** Pick four to six of 18 indicators. The page flags pairs that move closely together (correlation of 0.8 or more within the state), since counting both gives that idea extra weight.
 2. **Weights.** Split 100 points among the chosen indicators.
 3. **Scaling.** Choose ranks, 0 to 100, or z-scores. A small table shows how five districts score under each method.
 4. **Money.** See which districts would gain or lose poverty-weight dollars.
-5. **Reflect.** Answer three questions.
 
 The live panel updates as choices change. It has three views:
 

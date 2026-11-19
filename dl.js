@@ -10,7 +10,7 @@
   var M; // window.__mam, set when the data are ready
 
   function $(id) { return document.getElementById(id); }
-  function picked(name) { var x = document.querySelector("input[name=" + name + "]:checked"); return x ? x.value : null; }
+  function picked(id) { return $(id).value; }
   function today() { return new Date().toISOString().slice(0, 10); }
 
   // ---------------------------------------------------------------------------
@@ -322,12 +322,15 @@
   function render() {
     if (!M) return;
     var what = picked("dlWhat"), fmt = picked("dlFormat"), isMap = what === "map";
-    document.querySelectorAll("input[name=dlFormat]").forEach(function (x) {
-      var off = isMap ? x.value !== "json" : false;
-      x.disabled = off; x.closest(".choice").classList.toggle("off", off);
-    });
-    if (isMap && fmt !== "json") { $("dl-json").checked = true; fmt = "json"; }
-    $("dl-json-label").textContent = isMap ? "GeoJSON" : "JSON";
+    Array.prototype.forEach.call($("dlFormat").options, function (x) { x.disabled = isMap && x.value !== "json"; });
+    if (isMap && fmt !== "json") { $("dlFormat").value = "json"; fmt = "json"; }
+    $("dl-json").textContent = isMap ? "GeoJSON" : "JSON";
+    $("dlDesc").textContent = {
+      indicators: "All 18 indicators for each district, with margins of error.",
+      funding: "K-12 enrollment, who the state counts now, and the funding rules in law.",
+      results: "Your index, ranks, re-shared counts and dollars, with your choices.",
+      map: "The district shapes used on the map."
+    }[what];
     var note = "", ok = true;
     if (what === "results") {
       var s = M.state();
@@ -360,7 +363,7 @@
 
   document.addEventListener("mam:ready", function () {
     M = window.__mam;
-    document.querySelectorAll("#data input").forEach(function (x) { x.addEventListener("change", function () { $("dlDone").textContent = ""; render(); }); });
+    document.querySelectorAll("#data select").forEach(function (x) { x.addEventListener("change", function () { $("dlDone").textContent = ""; render(); }); });
     $("dlBtn").addEventListener("click", download);
     render();
   });
