@@ -193,9 +193,11 @@
 
   function results() {
     var R = rows(), law = LAW[state.st];
-    var out = R.map(function (r) {
+    // rank by who the state counts now (share of students), 1 = highest share
+    var curRank = rankDesc(R.map(function (r) { return r.basePct; }));
+    var out = R.map(function (r, i) {
       var cur = dollars(law, r.baseCount, r.enroll);
-      return { r: r, curCount: r.baseCount, curDollars: cur };
+      return { r: r, curCount: r.baseCount, curDollars: cur, curRank: curRank[i] };
     });
     if (!ready()) return { ok: false, rows: out };
     var w = weightsNow(), scaled = {};
@@ -376,7 +378,9 @@
 
     var cols = [
       { key: "name", head: "District", get: function (o) { return o.r.name; }, show: function (o) { return o.r.name + (o.r.type !== "unified" ? " (city K-8)" : ""); } },
-      { key: "rank", head: "Need rank", n: true, get: function (o) { return o.rank; }, show: function (o) { return String(o.rank); } },
+      { key: "curRank", head: "Rank now", n: true, get: function (o) { return o.curRank; }, show: function (o) { return String(o.curRank); } },
+      { key: "rank", head: "Your rank", n: true, get: function (o) { return o.rank; }, show: function (o) { return String(o.rank); } },
+      { key: "moved", head: "Moved", n: true, get: function (o) { return o.curRank - o.rank; }, show: function (o) { return movedText(o.curRank - o.rank); } },
       { key: "enroll", head: "K-12 students", n: true, get: function (o) { return o.r.enroll; }, show: function (o) { return fmtN(o.r.enroll); } },
       { key: "curPct", head: "Counted now", n: true, get: function (o) { return o.curCount / o.r.enroll; }, show: function (o) { return fmtN(100 * o.curCount / o.r.enroll, 1) + "%"; } },
       { key: "newPct", head: "Under your index", n: true, get: function (o) { return o.newCount / o.r.enroll; }, show: function (o) { return fmtN(100 * o.newCount / o.r.enroll, 1) + "%"; } },
@@ -489,8 +493,9 @@
       note.textContent = "Share of students the state counts now: " + LAW[state.st].measure + ". Choose indicators to see your index.";
     }
     rows().forEach(function (r, i) { var p = projected[r.leaid]; if (p) p.setAttribute("fill", cls[i]); });
-    ["index", "money"].forEach(function (v) { $("mv-" + v).setAttribute("aria-checked", String(state.view === v)); });
+    ["index", "money", "rank"].forEach(function (v) { $("mv-" + v).setAttribute("aria-checked", String(state.view === v)); });
     $("mv-money").disabled = !res.ok;
+    if (view === "rank") title.textContent = "Rankings";
   }
 
   function tipText(o) {
@@ -535,10 +540,58 @@
   // ---------------------------------------------------------------------------
   // Update loop
   // ---------------------------------------------------------------------------
+  function movedText(d) { return d > 0 ? "\u25B2 " + d : d < 0 ? "\u25BC " + (-d) : "no change"; }
+
+  // Side-by-side rankings: who the state counts now, and the user's index
+  function renderRanks(res) {
+    var now = $("rankNow"), yours = $("rankYours");
+    now.innerHTML = ""; yours.innerHTML = "";
+    var up = $("moveUp"), down = $("moveDown");
+    up.innerHTML = ""; down.innerHTML = "";
+    var R = res.rows, n = R.length, law = LAW[state.st];
+    function li(rank, o, showMove) {
+      var x = el("li", { "data-leaid": o.r.leaid });
+      x.appendChild(el("span", { class: "rk" }, rank + "."));
+      x.appendChild(el("span", null, o.r.name));
+      if (showMove) {
+        var d = o.curRank - o.rank;
+        x.appendChild(el("span", { class: "mv " + (d > 0 ? "up" : d < 0 ? "down" : "same") }, movedText(d)));
+      } else x.appendChild(el("span"));
+      return x;
+    }
+    R.slice().sort(function (a, b) { return a.curRank - b.curRank; }).forEach(function (o) { now.appendChild(li(o.curRank, o, false)); });
+    if (!res.ok) {
+      $("rankNote").textContent = "Left: " + n + " " + law.name + " districts ranked by the share of students the state counts now (" + law.measure + "). Choose indicators to see your ranking beside it.";
+      yours.appendChild(el("li", { class: "empty" }, "Choose indicators to rank districts."));
+      up.appendChild(el("li", null, "Choose indicators first."));
+      return;
+    }
+    $("rankNote").textContent = "Rank 1 is the most need. \u25B2 means a district ranks higher on your index than on the state's current measure. Hover a name to find it in both lists.";
+    R.slice().sort(function (a, b) { return a.rank - b.rank; }).forEach(function (o) { yours.appendChild(li(o.rank, o, true)); });
+    var byMove = R.slice().sort(function (a, b) { return (b.curRank - b.rank) - (a.curRank - a.rank) || a.rank - b.rank; });
+    function mv(o) {
+      var x = el("li");
+      x.appendChild(el("span", null, o.r.name + " "));
+      var d = o.curRank - o.rank;
+      x.appendChild(el("span", { class: "amt " + (d > 0 ? "up" : "down") }, movedText(d)));
+      x.appendChild(el("span", { class: "muted" }, " (" + o.curRank + " to " + o.rank + ")"));
+      return x;
+    }
+    byMove.slice(0, 5).forEach(function (o) { if (o.curRank - o.rank > 0) up.appendChild(mv(o)); });
+    byMove.slice(-5).reverse().forEach(function (o) { if (o.curRank - o.rank < 0) down.appendChild(mv(o)); });
+  }
+  function highlight(leaid) {
+    document.querySelectorAll(".ranklist li.hl").forEach(function (x) { x.classList.remove("hl"); });
+    if (leaid) document.querySelectorAll('.ranklist li[data-leaid="' + leaid + '"]').forEach(function (x) { x.classList.add("hl"); });
+  }
+
   function updateLive() {
     var res = results();
     colorMap(res);
     renderTop(res);
+    $("mapView").hidden = state.view === "rank";
+    $("rankView").hidden = state.view !== "rank";
+    if (state.view === "rank") { hideTip(); renderRanks(res); }
     if (state.step === 4) renderMoney(res);
     return res;
   }
@@ -560,8 +613,12 @@
         state.st = s; hideTip(); buildMap(); update();
       });
     });
-    ["index", "money"].forEach(function (v) {
+    ["index", "money", "rank"].forEach(function (v) {
       $("mv-" + v).addEventListener("click", function () { state.view = v; updateLive(); save(); });
+    });
+    ["rankNow", "rankYours"].forEach(function (id) {
+      $(id).addEventListener("mouseover", function (e) { var x = e.target.closest("li"); highlight(x && x.getAttribute("data-leaid")); });
+      $(id).addEventListener("mouseleave", function () { highlight(null); });
     });
     $("nextBtn").addEventListener("click", function () { if (state.step < STEPS.length - 1) { state.step++; update(); window.scrollTo(0, 0); } });
     $("backBtn").addEventListener("click", function () { if (state.step > 0) { state.step--; update(); window.scrollTo(0, 0); } });

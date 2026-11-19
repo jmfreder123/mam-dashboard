@@ -14,7 +14,13 @@ Each state is ranked on its own. Users go through five steps:
 4. **Money.** See which districts would gain or lose poverty-weight dollars.
 5. **Reflect.** Answer three questions.
 
-The map and the top-ten list update as choices change.
+The live panel updates as choices change. It has three views:
+
+- **Need:** a map of the user's index.
+- **Funding change:** a map of each district's gain or loss per student.
+- **Rankings:** two lists side by side. One ranks districts by the share of students the state counts now, the other by the user's index, and each district shows how many places it moved.
+
+The full district table in the money step also shows each district's rank now, its rank on the user's index, and the move.
 
 ### Index
 

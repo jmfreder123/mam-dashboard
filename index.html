@@ -126,13 +126,23 @@
         <div class="seg-sm" role="radiogroup" aria-label="Map view">
           <button type="button" class="seg" id="mv-index" data-view="index" aria-checked="true" role="radio">Need</button>
           <button type="button" class="seg" id="mv-money" data-view="money" aria-checked="false" role="radio">Funding change</button>
+          <button type="button" class="seg" id="mv-rank" data-view="rank" aria-checked="false" role="radio">Rankings</button>
         </div>
       </div>
-      <div class="mapbox"><svg id="map" role="img" aria-labelledby="mapTitle"></svg><div class="tip" id="tip" hidden></div></div>
-      <div class="legend" id="legend"></div>
-      <p class="muted small" id="mapNote"></p>
-      <h3>Top ten by your index</h3>
-      <ol class="toplist" id="topList"></ol>
+      <div id="mapView">
+        <div class="mapbox"><svg id="map" role="img" aria-labelledby="mapTitle"></svg><div class="tip" id="tip" hidden></div></div>
+        <div class="legend" id="legend"></div>
+        <p class="muted small" id="mapNote"></p>
+        <h3>Top ten by your index</h3>
+        <ol class="toplist" id="topList"></ol>
+      </div>
+      <div id="rankView" hidden>
+        <p class="muted small" id="rankNote"></p>
+        <div class="rankhead"><span>Ranked by who the state counts now</span><span>Ranked by your index</span></div>
+        <div class="rankscroll"><div class="ranks"><ol class="ranklist" id="rankNow"></ol><ol class="ranklist" id="rankYours"></ol></div></div>
+        <h3>Biggest moves</h3>
+        <div class="two"><div><p class="muted small">Up the most</p><ol class="plain moves" id="moveUp"></ol></div><div><p class="muted small">Down the most</p><ol class="plain moves" id="moveDown"></ol></div></div>
+      </div>
     </div>
   </aside>
 </main>
