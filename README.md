@@ -69,6 +69,10 @@ Limits to know:
 - **Mississippi base:** the FY26 base of $6,842.61 comes from George County School District's FY26 budget hearing (July 29, 2025). It has not yet been confirmed in an MDE document.
 - **Census figures:** they describe everyone living in a district, not enrolled students.
 
+## Codebook
+
+`codebook.html` lists every column in the downloads: its name in the file, what it holds, how it was built (with the exact ACS variables and formulas), its source, and the decision number behind it. The page links to it from the download section and the footer.
+
 ## Downloads
 
 The Download the data section at the bottom of the page (also reached from the Download data button at the top) lets anyone pick:
@@ -170,6 +174,7 @@ The decisions behind these choices are numbered D063 to D074 in the database's d
 
 - `index.html`, `style.css`, `app.js`: the page
 - `dl.js`: the downloads (CSV, Excel, Stata and JSON writers)
+- `codebook.html`: what every variable means, how it was built, its source and the decision behind it
 - `data/`: the five data files above
 
 To view it on your own computer, serve the folder (for example `python3 -m http.server`) and open the local address. Opening `index.html` directly from disk will not load the data.

@@ -340,7 +340,7 @@
     else if (fmt === "dta") note = "Stata format 118, for Stata 14 or later. Variable labels and notes are included (type notes in Stata to see them).";
     else if (fmt === "xlsx") note = "The workbook has three sheets: the data, what each variable means, and notes on sources.";
     else if (fmt === "json") note = "Includes what each variable means and notes on sources.";
-    else note = "Plain CSV. What each variable means is in the Excel, Stata and JSON files, and in the README.";
+    else note = "Plain CSV. What each variable means is in the Excel, Stata and JSON files, and in the codebook.";
     $("dlNote").textContent = note;
     $("dlBtn").disabled = !ok;
     renderPreview(what, picked("dlState"), ok);

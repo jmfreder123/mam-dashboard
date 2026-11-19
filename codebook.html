@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MAM Dashboard Codebook</title>
+<meta name="description" content="What every variable in the MAM Dashboard means, how it was built, where it comes from, and the decision behind it.">
+<link rel="stylesheet" href="style.css">
+<style>
+  .cb h2 { margin-top: 8px; }
+  .cb h3 { margin-top: 22px; }
+  .cb p, .cb li { max-width: 860px; }
+  .cb code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; background: var(--tone); padding: 1px 4px; }
+  .cb .dtable td:first-child { min-width: 140px; white-space: nowrap; }
+  .cb .dtable td { font-size: 14px; }
+  .cb .dtable td.src { min-width: 150px; }
+  .cb .dtable td.dec { white-space: nowrap; }
+  .toc { columns: 2; column-gap: 28px; padding-left: 20px; }
+  @media (max-width: 640px) { .toc { columns: 1; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <p class="eyebrow">Measuring Access · Draft</p>
+    <h1>Codebook</h1>
+    <p class="sub">What every variable means, how it was built, where it comes from, and the decision behind it</p>
+  </div>
+</header>
+
+<main class="wrap cb">
+  <div class="panel">
+    <p><a href="./">Back to the dashboard</a></p>
+    <p>This codebook covers every column in the dashboard's downloads. Each variable lists its name in the file, what it holds in plain words, how it was built, its source, and the numbered decision behind it. The decision numbers (D061 to D074) refer to the MAM census database's decision log.</p>
+    <ol class="toc">
+      <li><a href="#pipeline">How the data were built</a></li>
+      <li><a href="#units">Districts and IDs</a></li>
+      <li><a href="#moe">Margins of error</a></li>
+      <li><a href="#indicators">Indicators</a></li>
+      <li><a href="#funding">Funding inputs</a></li>
+      <li><a href="#results">Your results</a></li>
+      <li><a href="#geography">Map and neighbors</a></li>
+      <li><a href="#files">Data files and fingerprints</a></li>
+    </ol>
+  </div>
+
+  <div class="panel" id="pipeline">
+    <h2>How the data were built</h2>
+    <p>Every step reads only files whose fingerprint (SHA-256) matches the one recorded when the file was downloaded or made. A step stops if any input does not match, and it never overwrites a file.</p>
+    <ol>
+      <li><strong>Download.</strong> <code>01_download_acs.sh</code> pulls American Community Survey 5-year tables from the Census Data API for Mississippi and Tennessee school districts. The dashboard uses the 2020-2024 estimates. Other downloads: Census TIGER/Line 2024 school district boundaries (<code>04_download_tiger.sh</code>), Tennessee district profiles (<code>05_download_state_files.sh</code>, saved from a browser when the site refused scripted downloads), and, saved from a browser, the Mississippi enrollment file, the Mississippi school meals (CEP) list, the NCES directory, and USDA's SNAP-Authorized Retailer Access Map.</li>
+      <li><strong>Clean.</strong> <code>10_build_acs_long.R</code> turns each raw ACS file into a long table with one row per district and variable: the estimate, its 90% margin of error, and any Census special code (D067).</li>
+      <li><strong>Build.</strong> Stata 19 do-files make the dashboard's data (D067):
+        <ul>
+          <li><code>30_dashboard_districts.do</code>: the 277 districts, their IDs, K-12 enrollment, and who the state counts now.</li>
+          <li><code>31_dashboard_indicators.do</code>: 17 census indicators with margins of error.</li>
+          <li><code>32_dashboard_map.do</code>: the simplified district shapes.</li>
+          <li><code>33_dashboard_food.do</code>: the food access indicator.</li>
+          <li><code>34_dashboard_neighbors.do</code>: which districts border each other.</li>
+        </ul>
+      </li>
+      <li><strong>Check.</strong> Each product was recomputed separately in Python, cell by cell, before it went on the dashboard.</li>
+      <li><strong>Show.</strong> The dashboard's files in <code>data/</code> are exact copies of those products. The index, re-sharing and dollars are worked out in the browser (D071).</li>
+    </ol>
+  </div>
+
+  <div class="panel" id="units">
+    <h2>Districts and IDs</h2>
+    <p>The dashboard shows the school systems each state's formula pays (D063, D068).</p>
+    <ul>
+      <li><strong>Mississippi:</strong> 137 unified (K-12) districts.</li>
+      <li><strong>Tennessee:</strong> 140. That is 124 unified districts plus 16 city K-8 systems. The Census also draws 16 "secondary" pieces: county high-school areas inside those cities. Their students are funded through the county system, so they are not shown separately. A county system is described by the census numbers for its own K-12 area only.</li>
+      <li><strong>Left off:</strong> Fort Campbell Schools (4700078). It is a census district but is not in Tennessee's district profile and is not funded by TISA.</li>
+      <li><strong>Census figures</strong> describe everyone living in a district's area, not the students enrolled in it.</li>
+    </ul>
+    <div class="dtablewrap"><table class="dtable">
+      <tr><th>Name in file</th><th>What it is</th><th>How it was built</th><th>Source</th><th>Decision</th></tr>
+      <tr><td><code>state</code></td><td>State: MS or TN</td><td>From the first two digits of the federal ID (28 is Mississippi, 47 is Tennessee).</td><td class="src">Census</td><td class="dec">D063</td></tr>
+      <tr><td><code>leaid</code></td><td>Federal district ID (NCES LEA ID), 7 digits</td><td>The Census school district code, which is the same as the NCES ID. Kept as text so leading digits are never lost. Always included in downloads, so rows can be matched to other files.</td><td class="src">Census ACS and TIGER/Line, NCES</td><td class="dec">D063</td></tr>
+      <tr><td><code>st_no</code></td><td>State district number</td><td><code>st_leaid</code> without the state prefix and leading zeros. MS-0200 is MDE district 200, TN-00751 is TDOE district 751.</td><td class="src">NCES CCD 2024-25 preliminary directory</td><td class="dec">D068</td></tr>
+      <tr><td><code>st_leaid</code></td><td>State LEA ID as NCES lists it</td><td>As published.</td><td class="src">NCES CCD 2024-25 preliminary directory</td><td class="dec">D068</td></tr>
+      <tr><td><code>name_census</code></td><td>District name as the Census writes it</td><td>As published, with the state name at the end.</td><td class="src">Census ACS</td><td class="dec">D063</td></tr>
+      <tr><td><code>name_state</code></td><td>District name in the state's file</td><td>As published by TDOE or MDE.</td><td class="src">TDOE district profile, MDE enrollment</td><td class="dec">D066</td></tr>
+      <tr><td><code>name_ccd</code></td><td>District name in the NCES directory</td><td>As published.</td><td class="src">NCES CCD 2024-25</td><td class="dec">D068</td></tr>
+      <tr><td><code>district_type</code></td><td>Census district type: unified (K-12) or elementary (K-8)</td><td>From which Census district file the district comes from. Only Tennessee's 16 city systems are elementary.</td><td class="src">Census ACS</td><td class="dec">D063</td></tr>
+      <tr><td><code>district</code></td><td>District name (in your results)</td><td>The Census name without the state at the end.</td><td class="src">Census ACS</td><td class="dec">D063</td></tr>
+    </table></div>
+  </div>
+
+  <div class="panel" id="moe">
+    <h2>Margins of error</h2>
+    <p>The ACS is a survey, so every estimate has a margin of error. Each <code>_moe</code> column is the 90% margin of error: the true value is likely within that many points of the estimate. Small districts often have wide margins.</p>
+    <ul>
+      <li><strong>Published percents:</strong> the Census margin of error as published.</li>
+      <li><strong>100 minus a published percent</strong> (no broadband, adults without a diploma): keeps the published margin of error.</li>
+      <li><strong>Percents we built from counts</strong> use the Census Bureau's formulas from <em>Understanding and Using American Community Survey Data</em>:
+        <ul>
+          <li>sum or difference of counts: the square root of the sum of each margin of error squared</li>
+          <li>a share p = numerator / denominator: the square root of (numerator margin squared minus p squared times denominator margin squared), divided by the denominator</li>
+          <li>if the number under that square root is negative, the ratio formula is used instead: plus in place of minus. This happened for rent burden in 9 districts.</li>
+        </ul>
+      </li>
+      <li><strong>Food access</strong> has no margin of error. USDA publishes none.</li>
+    </ul>
+    <p>Decision: D069.</p>
+  </div>
+
+  <div class="panel" id="indicators">
+    <h2>Indicators</h2>
+    <p>Each indicator has two columns: <code>_est</code> (the value) and <code>_moe</code> (its margin of error). Seventeen are from the ACS 2020-2024 5-year estimates (D069). Food access is from USDA (D073). Higher means more need for every indicator except median household income, which is flipped so lower income counts as more need. Groups follow the dashboard's domains (D072, D073).</p>
+
+    <h3>Income and work</h3>
+    <div class="dtablewrap"><table class="dtable">
+      <tr><th>Name in file</th><th>What it is</th><th>How it was built</th><th>Source</th><th>Decision</th></tr>
+      <tr><td><code>inc185</code></td><td>Kids ages 6 to 17 in families below 185% of the poverty line (%). 185% is the reduced-price school meal line.</td><td>Built from counts. Numerator: kids 6 to 11 and 12 to 17 with an income-to-poverty ratio under 1.85 (the seven groups from "Under .50" to "1.75 to 1.84", for each age group). Denominator: all kids 6 to 11 plus 12 to 17. Times 100.</td><td class="src">ACS B17024_016 to _022 and _029 to _035, over B17024_015 + B17024_028</td><td class="dec">D069</td></tr>
+      <tr><td><code>pov517</code></td><td>Kids ages 5 to 17 below the poverty line (%)</td><td>As published.</td><td class="src">ACS S1701_C03_004</td><td class="dec">D069</td></tr>
+      <tr><td><code>unemp</code></td><td>Unemployment rate, people 16 and over (%)</td><td>As published.</td><td class="src">ACS S2301_C04_001</td><td class="dec">D069</td></tr>
+      <tr><td><code>mhhi</code></td><td>Median household income (2024 dollars)</td><td>As published. On the dashboard it is flipped before scaling, so lower income counts as more need. Downloads show the value before flipping.</td><td class="src">ACS B19013_001</td><td class="dec">D069</td></tr>
+      <tr><td><code>gini</code></td><td>Gini index of income inequality, 0 (everyone equal) to 1</td><td>As published. It measures how spread out incomes are in the district, not how many families are poor. Higher counts as more need. Users choose whether to use it.</td><td class="src">ACS B19083_001</td><td class="dec">D069</td></tr>
+    </table></div>
+
+    <h3>Food</h3>
+    <div class="dtablewrap"><table class="dtable">
+      <tr><th>Name in file</th><th>What it is</th><th>How it was built</th><th>Source</th><th>Decision</th></tr>
+      <tr><td><code>foodkids</code></td><td>Kids ages 0 to 17 who live far from a store that takes SNAP (%). Far means more than 1 mile by road in an urban census tract, or more than 10 miles by road in a rural one.</td><td>For each tract, kids with low access is the 1-mile count if the tract is urban and the 10-mile count if it is rural. Each tract's kids with low access and all kids are split across districts by the share of the tract's people living in each district, then added up. Value = 100 × kids with low access / all kids. This treats kids as spread like everyone else within a tract. USDA's own "kids share" columns divide by a tract's total population, so they are not used. Driving distance was chosen because straight-line distance puts almost every rural tract at zero. The kids, all-residents and low-income versions are nearly identical within tracts (correlation 1.00), so only kids is used. Six districts are at 0.</td><td class="src">USDA ERS SNAP-Authorized Retailer Access Map, July 2026 release (stores as of June 2025, 2020 Census, 2020 tracts): DD_SRAM_lakids1, DD_SRAM_lakids10, TractKids, Urban. Team tract-to-district crosswalk (share_of_tract_pop).</td><td class="dec">D073</td></tr>
+      <tr><td><code>snap</code></td><td>Households that received SNAP (food stamps) in the past 12 months (%)</td><td>As published.</td><td class="src">ACS S2201_C04_001</td><td class="dec">D061, D069</td></tr>
+    </table></div>
+
+    <h3>Health and housing</h3>
+    <div class="dtablewrap"><table class="dtable">
+      <tr><th>Name in file</th><th>What it is</th><th>How it was built</th><th>Source</th><th>Decision</th></tr>
+      <tr><td><code>unins</code></td><td>Kids under 19 with no health insurance (%)</td><td>As published.</td><td class="src">ACS S2701_C05_011</td><td class="dec">D069</td></tr>
+      <tr><td><code>crowd</code></td><td>Households with more than 1 person per room (%)</td><td>Built from counts. Numerator: owner and renter households with 1.01 to 1.50, 1.51 to 2.00, or 2.01 or more people per room. Denominator: all occupied housing units. Times 100.</td><td class="src">ACS B25014_005, _006, _007, _011, _012, _013, over B25014_001</td><td class="dec">D069</td></tr>
+      <tr><td><code>plumb</code></td><td>Households lacking complete plumbing (%)</td><td>Built from counts. Numerator: owner and renter households lacking plumbing facilities. Denominator: all occupied housing units. Times 100.</td><td class="src">ACS B25049_004 + _007, over B25049_001</td><td class="dec">D069</td></tr>
+      <tr><td><code>rentburden</code></td><td>Renter households paying 35% or more of income on rent (%)</td><td>Built from counts. Numerator: renters paying 35.0 to 39.9%, 40.0 to 49.9%, or 50% or more. Denominator: all renter households minus those whose share could not be computed. Times 100.</td><td class="src">ACS B25070_008 + _009 + _010, over B25070_001 minus B25070_011</td><td class="dec">D069</td></tr>
+      <tr><td><code>moved</code></td><td>People 1 and over who lived in a different house a year ago (%)</td><td>Built from counts. Numerator: everyone 1 and over minus those in the same house a year ago. Denominator: everyone 1 and over. Times 100.</td><td class="src">ACS B07003_001 minus B07003_004, over B07003_001</td><td class="dec">D069</td></tr>
+    </table></div>
+
+    <h3>Getting around and getting online</h3>
+    <div class="dtablewrap"><table class="dtable">
+      <tr><th>Name in file</th><th>What it is</th><th>How it was built</th><th>Source</th><th>Decision</th></tr>
+      <tr><td><code>noveh</code></td><td>Households with no vehicle available (%)</td><td>As published.</td><td class="src">ACS S2504_C02_027</td><td class="dec">D069</td></tr>
+      <tr><td><code>nobb</code></td><td>Households without a broadband internet subscription of any type (%)</td><td>100 minus the published share with broadband of any type. Keeps the published margin of error.</td><td class="src">ACS S2801_C02_014</td><td class="dec">D069</td></tr>
+      <tr><td><code>nocomp</code></td><td>Households without a computer (%)</td><td>As published.</td><td class="src">ACS S2801_C02_011</td><td class="dec">D069</td></tr>
+    </table></div>
+
+    <h3>Family and language</h3>
+    <div class="dtablewrap"><table class="dtable">
+      <tr><th>Name in file</th><th>What it is</th><th>How it was built</th><th>Source</th><th>Decision</th></tr>
+      <tr><td><code>nohs</code></td><td>Adults 25 and over without a high school diploma or equivalent (%)</td><td>100 minus the published share who are high school graduates or higher. Keeps the published margin of error.</td><td class="src">ACS S1501_C02_014</td><td class="dec">D061, D069</td></tr>
+      <tr><td><code>lep</code></td><td>People 5 and over who speak English less than "very well" (%)</td><td>As published.</td><td class="src">ACS S1601_C06_001</td><td class="dec">D061, D069</td></tr>
+      <tr><td><code>singlepar</code></td><td>Families with their own children under 18 headed by a single parent (%)</td><td>Built from counts. Numerator: male and female householders with no spouse present, with their own children under 18. Denominator: those plus married couples with their own children under 18. Times 100.</td><td class="src">ACS B11003_010 + _016, over B11003_003 + _010 + _016</td><td class="dec">D069</td></tr>
+    </table></div>
+
+    <h3>Other</h3>
+    <div class="dtablewrap"><table class="dtable">
+      <tr><th>Name in file</th><th>What it is</th><th>How it was built</th><th>Source</th><th>Decision</th></tr>
+      <tr><td><code>kids617</code></td><td>Children ages 6 to 17 (a count, not an indicator)</td><td>Kids 6 to 11 plus kids 12 to 17. Margin of error from the sum formula. Kept for context, not offered as an indicator.</td><td class="src">ACS B17024_015 + B17024_028</td><td class="dec">D069</td></tr>
+    </table></div>
+  </div>
+
+  <div class="panel" id="funding">
+    <h2>Funding inputs</h2>
+    <p>Who each state counts now, and the rules in law (D064, D066). Both states fund a year on the prior year's students, so 2024-25 counts feed 2025-26 (Tennessee) and FY26 (Mississippi) money.</p>
+    <div class="dtablewrap"><table class="dtable">
+      <tr><th>Name in file</th><th>What it is</th><th>How it was built</th><th>Source</th><th>Decision</th></tr>
+      <tr><td><code>enroll_k12</code></td><td>K-12 enrollment, 2024-25</td><td>Tennessee: the K-12 total in the district profile. Mississippi: total enrollment minus Infant/Toddler, Pre-K, Sped Pre-K, Grade 13, Adult Education and Secondary GED. A starred cell among those (fewer than 10 students, hidden by MDE) is counted as 0, so a Mississippi count can be high by up to 9 per starred cell.</td><td class="src">TDOE district profile 2024-25, MDE enrollment download</td><td class="dec">D066</td></tr>
+      <tr><td><code>base_pct</code></td><td>Share of students the state counts now (%)</td><td>Tennessee: the economically disadvantaged percent, which TDOE publishes as a whole number, so a district can be off by up to half a percentage point. Mississippi: the district-wide identified student percentage from the school meals (CEP) list, data as of April 14, 2025. This is the school meals measure, close to but not confirmed identical to the low-income count MSFF uses.</td><td class="src">TDOE district profile 2024-25, MDE Office of Child Nutrition CEP list</td><td class="dec">D066</td></tr>
+      <tr><td><code>base_count</code></td><td>Students the state counts now</td><td><code>enroll_k12</code> × <code>base_pct</code> / 100.</td><td class="src">Built</td><td class="dec">D066</td></tr>
+      <tr><td><code>base_measure</code></td><td>Which measure <code>base_pct</code> is</td><td>Text describing the measure and file.</td><td class="src">Built</td><td class="dec">D066</td></tr>
+      <tr><td><code>enroll_source</code></td><td>Which file <code>enroll_k12</code> is from</td><td>Text describing the file and what was subtracted.</td><td class="src">Built</td><td class="dec">D066</td></tr>
+      <tr><td><code>ms_starred_cells</code></td><td>Mississippi: hidden enrollment cells counted as 0</td><td>How many of the subtracted groups were starred for the district. Empty for Tennessee.</td><td class="src">MDE enrollment download</td><td class="dec">D066</td></tr>
+      <tr><td><code>cep_id</code>, <code>cep_name</code></td><td>Mississippi: the district's ID and name in the school meals list</td><td>Matched on the MDE district number. West Tallahatchie is listed under meal-program ID 00149 and was matched by name. Empty for Tennessee.</td><td class="src">MDE CEP list (PDF, read with pdfplumber)</td><td class="dec">D066</td></tr>
+      <tr><td><code>formula</code>, <code>formula_year</code></td><td>The state formula and year</td><td>TISA 2025-26 (Tennessee), MSFF FY26 (Mississippi).</td><td class="src">State law</td><td class="dec">D064</td></tr>
+      <tr><td><code>base_amount</code></td><td>Base amount per student, in law (dollars)</td><td>Tennessee $7,295. Mississippi $6,842.61, from George County School District's FY26 budget hearing (July 29, 2025), not yet confirmed in an MDE document.</td><td class="src">TISA Overview (April 2026), George County SD FY26 budget hearing</td><td class="dec">D064</td></tr>
+      <tr><td><code>poverty_weight</code></td><td>Extra share of the base for each counted student</td><td>Tennessee 0.25 (economically disadvantaged). Mississippi 0.30 (low-income).</td><td class="src">State law</td><td class="dec">D064</td></tr>
+      <tr><td><code>concentration_weight</code>, <code>concentration_line</code></td><td>Mississippi's concentrated poverty rule</td><td>Mississippi: 0.10 of the base for each low-income student above 0.35 (35%) of enrollment. Tennessee: 0 in this file. Tennessee's 5% concentrated poverty weight is set school by school, so it is not modeled and stays at its current amount.</td><td class="src">State law</td><td class="dec">D064, D065</td></tr>
+    </table></div>
+  </div>
+
+  <div class="panel" id="results">
+    <h2>Your results</h2>
+    <p>Computed in the browser from your choices (D064, D065, D071). Each state is ranked on its own. With both states in one file, each state's rows are still ranked within that state.</p>
+    <div class="dtablewrap"><table class="dtable">
+      <tr><th>Name in file</th><th>What it is</th><th>How it was built</th><th>Decision</th></tr>
+      <tr><td><code>val_</code><em>indicator</em></td><td>The district's value on each indicator you chose</td><td>The <code>_est</code> value from the indicators file, before flipping.</td><td class="dec">D069</td></tr>
+      <tr><td><code>sc_</code><em>indicator</em></td><td>That value after scaling</td><td>Median household income is flipped first (multiplied by −1). Then, across the state's districts:
+        <ul>
+          <li><strong>Ranks:</strong> the share of the other districts with a lower value, times 100.</li>
+          <li><strong>0 to 100:</strong> (value − lowest) / (highest − lowest) × 100.</li>
+          <li><strong>z-scores:</strong> (value − state mean) / state standard deviation (population formula).</li>
+        </ul>
+        The same rules as the Arizona Student Poverty Index Lab.</td><td class="dec">D069, D071</td></tr>
+      <tr><td><code>w_</code><em>indicator</em></td><td>Your weight on that indicator</td><td>Points out of 100.</td><td class="dec">D064</td></tr>
+      <tr><td><code>scaling</code></td><td>The scaling method you chose</td><td>rank, minmax or z.</td><td class="dec">D071</td></tr>
+      <tr><td><code>index</code></td><td>Your index of need</td><td>The sum of weight × scaled value, divided by 100, rounded to 9 decimals so districts with equal scores tie exactly.</td><td class="dec">D071</td></tr>
+      <tr><td><code>rank_now</code></td><td>Rank by the share the state counts now</td><td>1 is the highest <code>base_pct</code> in the state. Exact ties go to the district listed first alphabetically.</td><td class="dec">D065</td></tr>
+      <tr><td><code>rank_yours</code></td><td>Rank by your index</td><td>1 is the most need. Exact ties go to the district listed first alphabetically.</td><td class="dec">D071</td></tr>
+      <tr><td><code>rank_move</code></td><td>Places moved up</td><td><code>rank_now</code> − <code>rank_yours</code>. Positive means the district ranks as higher need on your index than on the state's measure.</td><td class="dec">D065</td></tr>
+      <tr><td><code>count_now</code></td><td>Students the state counts now</td><td>Same as <code>base_count</code>.</td><td class="dec">D066</td></tr>
+      <tr><td><code>count_yours</code></td><td>Students counted after re-sharing by your index</td><td>
+        <ol>
+          <li>Districts are ordered by your index, highest need first.</li>
+          <li>The state's actual district rates (<code>base_pct</code>) are sorted from highest to lowest and handed out in that order.</li>
+          <li>Each rate is multiplied by the district's K-12 enrollment.</li>
+          <li>The counts are scaled so the state total equals the actual total. A district that would go above its enrollment is held at its enrollment and the rest are scaled again.</li>
+        </ol>
+        Your index decides the order. The real spread of rates stays the same.</td><td class="dec">D065</td></tr>
+      <tr><td><code>dollars_now</code></td><td>Poverty-weight dollars now</td><td><code>count_now</code> × poverty weight × base amount. Mississippi adds max(0, <code>count_now</code> − 0.35 × enrollment) × 0.10 × base amount.</td><td class="dec">D064</td></tr>
+      <tr><td><code>dollars_yours</code></td><td>Poverty-weight dollars under your index</td><td>The same formula with <code>count_yours</code>. In Mississippi the state total can shift a little because the 35% rule is recomputed. In Tennessee the total stays the same.</td><td class="dec">D064, D065</td></tr>
+      <tr><td><code>change</code></td><td>Change in poverty-weight dollars</td><td><code>dollars_yours</code> − <code>dollars_now</code>.</td><td class="dec">D064</td></tr>
+      <tr><td><code>change_per_student</code></td><td>Change per K-12 student (dollars)</td><td><code>change</code> / <code>enroll_k12</code>.</td><td class="dec">D064</td></tr>
+    </table></div>
+  </div>
+
+  <div class="panel" id="geography">
+    <h2>Map and neighbors</h2>
+    <ul>
+      <li><strong>Map shapes</strong> (<code>data/map.geojson</code>): the 277 districts from the 2024 TIGER/Line unified and elementary files. Each boundary is simplified on its own to about 200 meters (0.002 degrees) and coordinates are rounded to 4 decimals, so shared borders can differ slightly up close. Fort Campbell shows as a gap. Shapes only, no data values. Decision D070.</li>
+      <li><strong>Neighbors</strong> (<code>data/neighbors.csv</code>): two districts border each other if they are in the same state and share at least 0.00001 degrees (about 1 meter) of border in the full 2024 TIGER/Line boundaries. Touching only at a corner does not count. Built from the full boundaries because the simplified map shapes gave 16 wrong pairs out of 655. 655 pairs, and every district has at least one neighbor. Decision D074.</li>
+      <li><strong>Tract-to-district shares</strong> (used for food access): the team's 2024 crosswalk, built from 2020 Census blocks. For each tract and district, the share of the tract's people living in that district. Every tract with people adds up to 1 across districts. Decision D073.</li>
+    </ul>
+  </div>
+
+  <div class="panel" id="files">
+    <h2>Data files and fingerprints</h2>
+    <p>The files in <code>data/</code> are exact copies of the database products. A file's fingerprint (SHA-256) changes if even one character changes.</p>
+    <div class="dtablewrap"><table class="dtable">
+      <tr><th>File</th><th>Made by</th><th>SHA-256</th></tr>
+      <tr><td><code>districts.csv</code></td><td><code>30_dashboard_districts.do</code></td><td><code>ea7759ca0e7df88ff6144a75b78101f5ac6504cd1da000c3875a6c53f9db0f8c</code></td></tr>
+      <tr><td><code>indicators.csv</code></td><td><code>31_dashboard_indicators.do</code></td><td><code>8c870d39bc5a687368738076dbd63eee73402c34c9a0ec67f26b6c155395010b</code></td></tr>
+      <tr><td><code>map.geojson</code></td><td><code>32_dashboard_map.do</code></td><td><code>1101a3c55047a759cff6ddda4b04fe54520e19779fc23b4d85456ebddb90cc02</code></td></tr>
+      <tr><td><code>food.csv</code></td><td><code>33_dashboard_food.do</code></td><td><code>09e699a888f049d0f6bae32380924b46135f9444dec8a0bb8c8c63355933f6ef</code></td></tr>
+      <tr><td><code>neighbors.csv</code></td><td><code>34_dashboard_neighbors.do</code></td><td><code>06b550f90b61e61bfc12ec76f108aabd5f7dbe9e7cc511350d69a2a27ad19574</code></td></tr>
+    </table></div>
+    <p>Full sources, with links, are in the <a href="https://github.com/jmfreder123/mam-dashboard#readme">README</a>.</p>
+  </div>
+</main>
+
+<footer class="wrap foot">
+  <p><a href="./">Back to the dashboard</a></p>
+  <p>Draft. Built by John M. Fredericks, Arizona State University.</p>
+</footer>
+</body>
+</html>
