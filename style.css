@@ -74,6 +74,9 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus
 .count { font-weight: 600; }
 
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+.domain { margin-top: 18px; }
+.domain h3 { margin: 0 0 8px; padding-bottom: 4px; border-bottom: 2px solid var(--rule); }
+.domain .dcount { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; font-size: 13px; font-weight: 400; color: var(--soft); margin-left: 6px; }
 .card { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--rule); padding: 12px; cursor: pointer; background: #FFF; }
 .card input { margin-top: 4px; accent-color: var(--accent); width: 18px; height: 18px; flex: none; }
 .card.on { border-color: var(--accent); background: #FBF3F6; }

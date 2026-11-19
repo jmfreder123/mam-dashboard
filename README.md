@@ -73,25 +73,27 @@ There are 277 districts: the school systems each state's formula pays.
 
 ## Indicators (ACS 2020-2024 5-year)
 
-| Indicator | Census source |
-|---|---|
-| Kids below 185% of poverty, ages 6 to 17 | B17024, built from counts |
-| Kids below poverty, ages 5 to 17 | S1701_C03_004 |
-| SNAP households | S2201_C04_001 |
-| Kids uninsured, under 19 | S2701_C05_011 |
-| Unemployment rate, 16 and over | S2301_C04_001 |
-| No broadband | 100 − S2801_C02_014 |
-| No computer | S2801_C02_011 |
-| Adults 25+ without a high school diploma | 100 − S1501_C02_014 |
-| Limited English, 5 and over | S1601_C06_001 |
-| No vehicle | S2504_C02_027 |
-| Crowded housing (more than 1 person per room) | B25014, built |
-| No complete plumbing | B25049, built |
-| Rent burden (35% or more of income) | B25070, built ("not computed" left out) |
-| Single-parent families | B11003, built |
-| Moved in the past year | B07003, built |
-| Median household income | B19013_001 |
-| Gini index | B19083_001 |
+The indicators are grouped into four domains for now. These will be renamed to MAM domains as more domains are added.
+
+| Domain | Indicator | Census source |
+|---|---|---|
+| Income and work | Kids below 185% of poverty, ages 6 to 17 | B17024, built from counts |
+| Income and work | Kids below poverty, ages 5 to 17 | S1701_C03_004 |
+| Income and work | Unemployment rate, 16 and over | S2301_C04_001 |
+| Income and work | Median household income | B19013_001 |
+| Income and work | Gini index | B19083_001 |
+| Food, health and housing | SNAP households | S2201_C04_001 |
+| Food, health and housing | Kids uninsured, under 19 | S2701_C05_011 |
+| Food, health and housing | Crowded housing (more than 1 person per room) | B25014, built |
+| Food, health and housing | No complete plumbing | B25049, built |
+| Food, health and housing | Rent burden (35% or more of income) | B25070, built ("not computed" left out) |
+| Food, health and housing | Moved in the past year | B07003, built |
+| Getting around and getting online | No vehicle | S2504_C02_027 |
+| Getting around and getting online | No broadband | 100 − S2801_C02_014 |
+| Getting around and getting online | No computer | S2801_C02_011 |
+| Family and language | Adults 25+ without a high school diploma | 100 − S1501_C02_014 |
+| Family and language | Limited English, 5 and over | S1601_C06_001 |
+| Family and language | Single-parent families | B11003, built |
 
 Each value has its margin of error (90%) in `data/indicators.csv`. Built percents use the Census Bureau's approximation formulas from *Understanding and Using American Community Survey Data*.
 
@@ -119,7 +121,7 @@ Sources behind them:
   - [Mississippi Student Funding Formula, TPC](https://tpcref.org/mississippi-student-funding-formula/)
   - [George County School District FY26 budget hearing](https://irp.cdn-website.com/5877256e/files/uploaded/2025-2026+Public+Hearing+July+29-+2025.pdf)
 
-The decisions behind these choices are numbered D063 to D071 in the database's decision log.
+The decisions behind these choices are numbered D063 to D072 in the database's decision log.
 
 ## Files
 

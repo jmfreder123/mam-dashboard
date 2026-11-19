@@ -5,25 +5,32 @@
   // Indicators (decision D069). dir 1: higher means more need. dir -1: lower means more need.
   // ---------------------------------------------------------------------------
   var IND = [
-    { code: "inc185", label: "Kids below 185% of poverty", unit: "%", dir: 1, desc: "Children 6 to 17 in families under 185% of the poverty line, the FRPL reduced-price line." },
-    { code: "pov517", label: "Kids below poverty", unit: "%", dir: 1, desc: "Children 5 to 17 below the poverty line." },
-    { code: "snap", label: "SNAP households", unit: "%", dir: 1, desc: "Households that received SNAP (food stamps) in the past 12 months." },
-    { code: "unins", label: "Kids uninsured", unit: "%", dir: 1, desc: "Children under 19 with no health insurance." },
-    { code: "unemp", label: "Unemployment rate", unit: "%", dir: 1, desc: "People 16 and over in the labor force who are out of work." },
-    { code: "nobb", label: "No broadband", unit: "%", dir: 1, desc: "Households without a broadband internet subscription of any type." },
-    { code: "nocomp", label: "No computer", unit: "%", dir: 1, desc: "Households without a computer." },
-    { code: "nohs", label: "Adults without a diploma", unit: "%", dir: 1, desc: "Adults 25 and over without a high school diploma or equivalent." },
-    { code: "lep", label: "Limited English", unit: "%", dir: 1, desc: "People 5 and over who speak English less than “very well.”" },
-    { code: "noveh", label: "No vehicle", unit: "%", dir: 1, desc: "Households with no vehicle available." },
-    { code: "crowd", label: "Crowded housing", unit: "%", dir: 1, desc: "Households with more than one person per room." },
-    { code: "plumb", label: "No complete plumbing", unit: "%", dir: 1, desc: "Households lacking complete plumbing." },
-    { code: "rentburden", label: "Rent burden", unit: "%", dir: 1, desc: "Renter households paying 35 percent or more of income on rent." },
-    { code: "singlepar", label: "Single-parent families", unit: "%", dir: 1, desc: "Families with their own children under 18 that are headed by a single parent." },
-    { code: "moved", label: "Moved in the past year", unit: "%", dir: 1, desc: "People 1 and over who lived in a different house a year ago." },
-    { code: "mhhi", label: "Median household income", unit: "$", dir: -1, desc: "Half of households earn more and half earn less (2024 dollars).", note: "Lower income counts as more need." },
-    { code: "gini", label: "Gini index", unit: "", dir: 1, desc: "How spread out incomes are inside the district, from 0 (equal) to 1.", note: "This measures inequality, not how many families are poor. Here, higher counts as more need." }
+    { code: "inc185", domain: "income", label: "Kids below 185% of poverty", unit: "%", dir: 1, desc: "Children 6 to 17 in families under 185% of the poverty line, the FRPL reduced-price line." },
+    { code: "pov517", domain: "income", label: "Kids below poverty", unit: "%", dir: 1, desc: "Children 5 to 17 below the poverty line." },
+    { code: "unemp", domain: "income", label: "Unemployment rate", unit: "%", dir: 1, desc: "People 16 and over in the labor force who are out of work." },
+    { code: "mhhi", domain: "income", label: "Median household income", unit: "$", dir: -1, desc: "Half of households earn more and half earn less (2024 dollars).", note: "Lower income counts as more need." },
+    { code: "gini", domain: "income", label: "Gini index", unit: "", dir: 1, desc: "How spread out incomes are inside the district, from 0 (equal) to 1.", note: "This measures inequality, not how many families are poor. Here, higher counts as more need." },
+    { code: "snap", domain: "needs", label: "SNAP households", unit: "%", dir: 1, desc: "Households that received SNAP (food stamps) in the past 12 months." },
+    { code: "unins", domain: "needs", label: "Kids uninsured", unit: "%", dir: 1, desc: "Children under 19 with no health insurance." },
+    { code: "crowd", domain: "needs", label: "Crowded housing", unit: "%", dir: 1, desc: "Households with more than one person per room." },
+    { code: "plumb", domain: "needs", label: "No complete plumbing", unit: "%", dir: 1, desc: "Households lacking complete plumbing." },
+    { code: "rentburden", domain: "needs", label: "Rent burden", unit: "%", dir: 1, desc: "Renter households paying 35 percent or more of income on rent." },
+    { code: "moved", domain: "needs", label: "Moved in the past year", unit: "%", dir: 1, desc: "People 1 and over who lived in a different house a year ago." },
+    { code: "noveh", domain: "access", label: "No vehicle", unit: "%", dir: 1, desc: "Households with no vehicle available." },
+    { code: "nobb", domain: "access", label: "No broadband", unit: "%", dir: 1, desc: "Households without a broadband internet subscription of any type." },
+    { code: "nocomp", domain: "access", label: "No computer", unit: "%", dir: 1, desc: "Households without a computer." },
+    { code: "nohs", domain: "family", label: "Adults without a diploma", unit: "%", dir: 1, desc: "Adults 25 and over without a high school diploma or equivalent." },
+    { code: "lep", domain: "family", label: "Limited English", unit: "%", dir: 1, desc: "People 5 and over who speak English less than “very well.”" },
+    { code: "singlepar", domain: "family", label: "Single-parent families", unit: "%", dir: 1, desc: "Families with their own children under 18 that are headed by a single parent." }
   ];
   var BY = {}; IND.forEach(function (d) { BY[d.code] = d; });
+  // Groups for now (decision D072); to be renamed to MAM domains as they are added
+  var DOMAINS = [
+    { key: "income", label: "Income and work" },
+    { key: "needs", label: "Food, health and housing" },
+    { key: "access", label: "Getting around and getting online" },
+    { key: "family", label: "Family and language" }
+  ];
 
   // ---------------------------------------------------------------------------
   // Funding rules in law (decisions D064, D065). 2024-25 student counts fund 2025-26.
@@ -246,6 +253,18 @@
     var box = $("indicatorCards"); box.innerHTML = "";
     var n = state.picked.length;
     $("pickCount").textContent = n + " selected" + (n > 0 && (n < 4 || n > 6) ? ". Four to six works best." : ".");
+    var groups = {};
+    DOMAINS.forEach(function (g) {
+      var sec = el("div", { class: "domain" });
+      var n = IND.filter(function (d) { return d.domain === g.key; }).length;
+      var k = IND.filter(function (d) { return d.domain === g.key && state.picked.indexOf(d.code) >= 0; }).length;
+      sec.appendChild(el("h3", null, g.label + " "));
+      sec.lastChild.appendChild(el("span", { class: "dcount" }, k + " of " + n + " picked"));
+      var cards = el("div", { class: "cards" });
+      sec.appendChild(cards);
+      box.appendChild(sec);
+      groups[g.key] = cards;
+    });
     IND.forEach(function (d) {
       var on = state.picked.indexOf(d.code) >= 0;
       var vals = rows().map(function (r) { return r.vals[d.code]; });
@@ -266,7 +285,7 @@
       txt.appendChild(el("span", { class: "range" }, LAW[state.st].name + " districts: " + fmtVal(d.code, Math.min.apply(null, vals)) + " to " + fmtVal(d.code, Math.max.apply(null, vals))));
       if (d.note) txt.appendChild(el("span", { class: "note" }, d.note));
       lab.appendChild(cb); lab.appendChild(txt);
-      box.appendChild(lab);
+      groups[d.domain].appendChild(lab);
     });
     var warn = $("corrWarn"); warn.innerHTML = "";
     for (var i = 0; i < state.picked.length; i++) for (var j = i + 1; j < state.picked.length; j++) {
