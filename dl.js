@@ -343,6 +343,47 @@
     else note = "Plain CSV. What each variable means is in the Excel, Stata and JSON files, and in the README.";
     $("dlNote").textContent = note;
     $("dlBtn").disabled = !ok;
+    renderPreview(what, picked("dlState"), ok);
+  }
+
+  // the table people are about to download, shown on the page
+  function renderPreview(what, sel, ok) {
+    var box = $("dlPreview"), note = $("dlPrevNote");
+    box.innerHTML = "";
+    if (what === "map") {
+      note.textContent = "Map boundaries are shapes, not a table. The file has one shape for each district, with its federal ID and name.";
+      box.hidden = true; return;
+    }
+    if (!ok) { note.textContent = "Your results will show here once your indicators and weights are set."; box.hidden = true; return; }
+    var ds = what === "indicators" ? indicatorsData(sel) : what === "funding" ? fundingData(sel) : resultsData(sel);
+    note.textContent = ds.rows.length + " districts and " + ds.cols.length + " columns. Hover over a column name to see what it means. Scroll sideways to see every column.";
+    var t = document.createElement("table"), thead = document.createElement("thead"), hr = document.createElement("tr");
+    ds.cols.forEach(function (c) {
+      var th = document.createElement("th");
+      th.textContent = c.name; th.title = c.label;
+      if (c.type === "num") th.className = "n";
+      var sub = document.createElement("span"); sub.className = "lab"; sub.textContent = c.label;
+      th.appendChild(sub);
+      hr.appendChild(th);
+    });
+    thead.appendChild(hr); t.appendChild(thead);
+    var tb = document.createElement("tbody");
+    ds.rows.forEach(function (r) {
+      var tr = document.createElement("tr");
+      ds.cols.forEach(function (c) {
+        var td = document.createElement("td"), v = r[c.name];
+        if (c.type === "num") {
+          td.className = "n";
+          var x = numOf(v);
+          td.textContent = x == null ? "" : typeof v === "string" ? v : String(Math.round(x * 1e6) / 1e6);
+        } else td.textContent = v == null ? "" : String(v);
+        tr.appendChild(td);
+      });
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb);
+    box.appendChild(t);
+    box.hidden = false;
   }
 
   function download() {

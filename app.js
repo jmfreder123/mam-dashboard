@@ -850,6 +850,7 @@
     $("rankView").hidden = state.view !== "rank";
     if (state.view === "rank") { hideTip(); renderRanks(res); }
     if (state.step === 4) renderMoney(res);
+    document.dispatchEvent(new CustomEvent("mam:update"));
     return res;
   }
   function update() {
@@ -860,7 +861,6 @@
     if (state.step === 3) renderScale();
     updateLive();
     save();
-    document.dispatchEvent(new CustomEvent("mam:update"));
   }
 
   // results for either state, for downloads; the page's own state is left as it was
