@@ -205,6 +205,9 @@ ol.ranklist li.empty { display: block; color: var(--soft); }
 .dlpreview th .code { display: block; font-weight: 400; color: var(--soft); font-size: 11px; margin-top: 3px; font-family: ui-monospace, Menlo, Consolas, monospace; }
 .dlpreview td.n, .dlpreview th.n { text-align: right; font-variant-numeric: tabular-nums; }
 .dlpreview th.n .lab { text-align: right; margin-left: auto; }
+.footlogos { display: flex; align-items: center; gap: 12px 24px; flex-wrap: wrap; padding: 18px 0 6px; border-top: 1px solid var(--rule); margin-bottom: 10px; }
+.footlogos img { height: 46px; width: auto; display: block; }
+.footlogos p { margin: 0; color: var(--soft); }
 .foot { color: var(--soft); font-size: 14px; padding-bottom: 32px; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
