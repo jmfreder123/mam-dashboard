@@ -1,0 +1,278 @@
+state,leaid,st_no,name_census,district_type,homeval_est,homeval_moe,proptax_est,proptax_moe
+MS,2800185,618,"West Bolivar Consolidated School District, Mississippi",unified,90300,12539,490,147
+MS,2800186,617,"North Bolivar Consolidated School District, Mississippi",unified,91000,25484,513,276
+MS,2800187,6711,"Sunflower County Consolidated School District, Mississippi",unified,100300,9349,930,107
+MS,2800189,5321,"Starkville Oktibbeha Consolidated School District, Mississippi",unified,237700,19848,1691,256
+MS,2800191,1321,"West Point Consolidated School District, Mississippi",unified,129100,25890,810,131
+MS,2800195,2611,"Holmes County Consolidated School District, Mississippi",unified,80400,10741,690,111
+MS,2800196,4911,"Winona-Montgomery County Consolidated School District, Mississippi",unified,126800,18379,1269,246
+MS,2800198,4211,"Greenwood-Leflore Consolidated School District, Mississippi",unified,101200,8104,1033,184
+MS,2800200,911,"Chickasaw County School District, Mississippi",unified,113900,11320,765,269
+MS,2800360,4820,"Aberdeen School District, Mississippi",unified,96400,11350,881,159
+MS,2800390,200,"Alcorn School District, Mississippi",unified,121800,10205,721,86
+MS,2800420,300,"Amite County School District, Mississippi",unified,100800,12231,386,85
+MS,2800450,4821,"Amory School District, Mississippi",unified,122100,22893,843,124
+MS,2800510,400,"Attala County School District, Mississippi",unified,88800,11163,583,105
+MS,2800540,5920,"Baldwyn School District, Mississippi",unified,127500,40251,870,304
+MS,2800570,2320,"Bay St. Louis-Waveland School District, Mississippi",unified,253000,29933,1891,304
+MS,2800600,500,"Benton County School District, Mississippi",unified,105100,8693,720,92
+MS,2800630,2420,"Biloxi Public School District, Mississippi",unified,209200,12897,1213,85
+MS,2800750,614,"Cleveland School District, Mississippi",unified,157400,12462,1298,199
+MS,2800820,5921,"Booneville School District, Mississippi",unified,125800,16349,1097,207
+MS,2800840,4320,"Brookhaven School District, Mississippi",unified,156600,8663,1182,136
+MS,2800870,700,"Calhoun County School District, Mississippi",unified,90300,7408,600,173
+MS,2800900,4520,"Canton Public School District, Mississippi",unified,244800,49725,1785,362
+MS,2800930,800,"Carroll County School District, Mississippi",unified,109600,21850,577,164
+MS,2800990,1000,"Choctaw County School District, Mississippi",unified,117200,13701,563,89
+MS,2801020,1100,"Claiborne County School District, Mississippi",unified,82700,8237,403,97
+MS,2801050,1420,"Clarksdale Municipal School District, Mississippi",unified,83900,14042,1342,209
+MS,2801090,2521,"Clinton Public School District, Mississippi",unified,224000,7789,1694,84
+MS,2801110,1400,"Coahoma County School District, Mississippi",unified,98600,16120,696,72
+MS,2801140,8111,"Coffeeville School District, Mississippi",unified,95400,23769,600,211
+MS,2801170,4620,"Columbia School District, Mississippi",unified,131100,13798,1117,241
+MS,2801200,4420,"Columbus Municipal School District, Mississippi",unified,146600,13086,1130,106
+MS,2801220,1500,"Copiah County School District, Mississippi",unified,113800,9811,796,155
+MS,2801260,220,"Corinth School District, Mississippi",unified,177100,23708,1204,199
+MS,2801290,1600,"Covington County School District, Mississippi",unified,105100,16822,619,165
+MS,2801320,1700,"DeSoto County School District, Mississippi",unified,269600,5560,1613,40
+MS,2801380,3111,"East Jasper School District, Mississippi",unified,114000,28249,817,228
+MS,2801410,6811,"East Tallahatchie School District, Mississippi",unified,91300,11117,507,116
+MS,2801440,1211,"Enterprise School District, Mississippi",unified,135900,25251,807,259
+MS,2801470,6220,"Forest Municipal School District, Mississippi",unified,117800,44046,767,469
+MS,2801490,1800,"Forrest County Schools, Mississippi",unified,172900,19851,1259,197
+MS,2801530,1900,"Franklin County School District, Mississippi",unified,101900,9643,739,270
+MS,2801560,2000,"George County School District, Mississippi",unified,166900,9153,1044,143
+MS,2801590,2100,"Greene County School District, Mississippi",unified,92700,15155,791,114
+MS,2801620,7620,"Greenville Public School District, Mississippi",unified,94900,9526,896,248
+MS,2801680,2220,"Grenada School District, Mississippi",unified,132200,21066,1355,226
+MS,2801710,2421,"Gulfport School District, Mississippi",unified,181100,13456,1347,90
+MS,2801740,2300,"Hancock County School District, Mississippi",unified,211900,12794,1454,127
+MS,2801770,2400,"Harrison County School District, Mississippi",unified,211800,6639,1297,70
+MS,2801800,1820,"Hattiesburg Public School District, Mississippi",unified,154000,9704,1344,133
+MS,2801830,1520,"Hazlehurst City School District, Mississippi",unified,115500,30331,868,226
+MS,2801860,2500,"Hinds County School District, Mississippi",unified,195100,7886,1359,83
+MS,2801890,7611,"Hollandale School District, Mississippi",unified,83900,6957,662,245
+MS,2801950,4720,"Holly Springs School District, Mississippi",unified,145500,27016,1441,249
+MS,2802040,2700,"Humphreys County School District, Mississippi",unified,87800,13006,861,154
+MS,2802100,2900,"Itawamba County School District, Mississippi",unified,142400,15031,835,167
+MS,2802160,3000,"Jackson County School District, Mississippi",unified,206700,10191,1333,98
+MS,2802190,2520,"Jackson Public School District, Mississippi",unified,107700,6089,1338,70
+MS,2802220,3200,"Jefferson County School District, Mississippi",unified,81300,12846,698,166
+MS,2802250,3300,"Jefferson Davis County School District, Mississippi",unified,90100,8158,800,178
+MS,2802280,3400,"Jones County School District, Mississippi",unified,151100,14226,993,118
+MS,2802310,3500,"Kemper County School District, Mississippi",unified,99600,21335,563,95
+MS,2802340,420,"Kosciusko School District, Mississippi",unified,118900,10811,850,91
+MS,2802370,3600,"Lafayette County School District, Mississippi",unified,251200,27898,1120,154
+MS,2802400,3700,"Lamar County School District, Mississippi",unified,221000,9688,1466,94
+MS,2802430,3800,"Lauderdale County School District, Mississippi",unified,166900,18107,1189,92
+MS,2802460,3420,"Laurel School District, Mississippi",unified,121800,26221,1227,182
+MS,2802490,3900,"Lawrence County School District, Mississippi",unified,100000,12720,674,84
+MS,2802520,4000,"Leake County School District, Mississippi",unified,116800,10113,778,103
+MS,2802550,4100,"Lee County School District, Mississippi",unified,187700,12306,1194,81
+MS,2802610,7612,"Leland School District, Mississippi",unified,116300,9858,1026,345
+MS,2802640,4300,"Lincoln County School District, Mississippi",unified,152800,48547,985,182
+MS,2802670,2422,"Long Beach School District, Mississippi",unified,215900,10693,1971,179
+MS,2802700,8020,"Louisville Municipal School District, Mississippi",unified,124600,14243,806,81
+MS,2802730,4400,"Lowndes County School District, Mississippi",unified,193200,21690,895,75
+MS,2802790,4500,"Madison County School District, Mississippi",unified,316000,10720,2146,112
+MS,2802820,4600,"Marion County School District, Mississippi",unified,114300,30630,850,135
+MS,2802850,4700,"Marshall County School District, Mississippi",unified,179500,28621,1087,151
+MS,2802880,5720,"McComb School District, Mississippi",unified,116400,17277,1241,175
+MS,2802910,3820,"Meridian Public School District, Mississippi",unified,107600,8183,1305,100
+MS,2802940,4800,"Monroe County School District, Mississippi",unified,158700,19668,865,107
+MS,2803000,3020,"Moss Point School District, Mississippi",unified,111000,11757,978,183
+MS,2803030,130,"Natchez-Adams School District, Mississippi",unified,108700,7346,974,115
+MS,2803060,5000,"Neshoba County School District, Mississippi",unified,99900,12535,818,107
+MS,2803090,4111,"Nettleton School District, Mississippi",unified,114200,24720,882,259
+MS,2803120,7320,"New Albany Public Schools, Mississippi",unified,157800,9956,908,130
+MS,2803150,5100,"Newton County School District, Mississippi",unified,114300,13300,705,105
+MS,2803180,5130,"Newton Municipal School, Mississippi",unified,87400,10144,890,58
+MS,2803210,5411,"North Panola School District, Mississippi",unified,116000,30127,653,203
+MS,2803240,5711,"North Pike School District, Mississippi",unified,144100,22963,891,180
+MS,2803270,7011,"North Tippah School District, Mississippi",unified,120800,17234,865,129
+MS,2803300,5200,"Noxubee County School District, Mississippi",unified,90800,5943,868,166
+MS,2803360,3021,"Ocean Springs School District, Mississippi",unified,241800,8971,1909,194
+MS,2803390,921,"Okolona Separate School District, Mississippi",unified,101000,22579,908,183
+MS,2803450,3620,"Oxford School District, Mississippi",unified,384100,30842,2363,265
+MS,2803480,3022,"Pascagoula-Gautier School District, Mississippi",unified,155300,6385,1141,94
+MS,2803510,2423,"Pass Christian Public School District, Mississippi",unified,267400,27049,1840,255
+MS,2803520,6120,"Pearl Public School District, Mississippi",unified,182300,8446,1207,117
+MS,2803530,1821,"Petal School District, Mississippi",unified,195600,17807,1439,138
+MS,2803540,5500,"Pearl River County School District, Mississippi",unified,209400,14235,1320,98
+MS,2803570,5600,"Perry County Schools, Mississippi",unified,97800,29715,748,142
+MS,2803600,5020,"Philadelphia Public School District, Mississippi",unified,103100,32632,1156,231
+MS,2803630,5520,"Picayune School District, Mississippi",unified,162300,12985,1126,137
+MS,2803660,5800,"Pontotoc County Schools, Mississippi",unified,147700,28418,899,110
+MS,2803690,5820,"Pontotoc City Schools, Mississippi",unified,165700,12775,943,263
+MS,2803720,5530,"Poplarville Separate School District, Mississippi",unified,173500,27700,943,238
+MS,2803750,5900,"Prentiss County School District, Mississippi",unified,120600,14985,827,169
+MS,2803780,1212,"Quitman School District, Mississippi",unified,110100,13212,567,80
+MS,2803810,6000,"Quitman County School District, Mississippi",unified,69600,8846,740,86
+MS,2803830,6100,"Rankin County School District, Mississippi",unified,249300,6916,1466,64
+MS,2803870,5620,"Richton School District, Mississippi",unified,154400,14587,869,451
+MS,2803900,6200,"Scott County School District, Mississippi",unified,104600,20422,686,186
+MS,2803930,6920,"Senatobia Municipal School District, Mississippi",unified,234100,19388,1972,224
+MS,2803960,6312,"South Delta School District, Mississippi",unified,100800,18642,758,178
+MS,2803990,6400,"Simpson County School District, Mississippi",unified,122200,8589,751,74
+MS,2804020,6500,"Smith County School District, Mississippi",unified,112600,13162,469,101
+MS,2804050,5412,"South Panola School District, Mississippi",unified,133300,26256,887,167
+MS,2804080,5712,"South Pike School District, Mississippi",unified,85300,7795,756,154
+MS,2804110,7012,"South Tippah School District, Mississippi",unified,128800,29338,1056,158
+MS,2804170,6600,"Stone County School District, Mississippi",unified,161100,11554,1134,135
+MS,2804230,6900,"Tate County School District, Mississippi",unified,176000,33509,1141,95
+MS,2804260,7100,"Tishomingo County Schools, Mississippi",unified,145100,14826,705,74
+MS,2804290,7200,"Tunica County School District, Mississippi",unified,175900,39262,940,230
+MS,2804320,4120,"Tupelo Public School District, Mississippi",unified,216900,6583,1651,121
+MS,2804350,7300,"Union County School District, Mississippi",unified,170700,19368,931,246
+MS,2804380,5131,"Union Public School District, Mississippi",unified,102400,14084,618,198
+MS,2804440,7400,"Walthall County School District, Mississippi",unified,126600,28642,913,123
+MS,2804470,7500,"Vicksburg Warren School District, Mississippi",unified,156400,13008,1244,97
+MS,2804500,8113,"Water Valley School District, Mississippi",unified,149100,23244,885,102
+MS,2804530,7700,"Wayne County School District, Mississippi",unified,91100,8311,578,100
+MS,2804560,7800,"Webster County School District, Mississippi",unified,120100,11680,821,179
+MS,2804590,3112,"West Jasper School District, Mississippi",unified,99300,24794,657,128
+MS,2804650,6812,"West Tallahatchie School, Mississippi",unified,69500,9547,498,56
+MS,2804680,7613,"Western Line School District, Mississippi",unified,119500,20300,945,325
+MS,2804710,7900,"Wilkinson County School District, Mississippi",unified,90000,9829,895,270
+MS,2804770,8220,"Yazoo City Municipal School District, Mississippi",unified,103000,16971,1556,339
+MS,2804800,8200,"Yazoo County School District, Mississippi",unified,187500,40671,1114,156
+TN,4700001,320,"Hamblen County School District, Tennessee",unified,210900,8889,862,51
+TN,4700030,171,"Alamo City School District, Tennessee",elementary (K-8),162200,11056,1004,147
+TN,4700060,51,"Alcoa City School District, Tennessee",unified,277100,28762,2389,410
+TN,4700090,10,"Anderson County School District, Tennessee",unified,233800,11440,1120,68
+TN,4700120,541,"Athens City Schools, Tennessee",elementary (K-8),225000,18144,1098,97
+TN,4700148,792,"Shelby County School District, Tennessee",unified,193300,4389,1894,39
+TN,4700149,795,"Collierville School District, Tennessee",unified,485900,11786,4834,223
+TN,4700150,798,"Millington Municipal School District, Tennessee",unified,219100,32978,1813,289
+TN,4700151,796,"Germantown Municipal School District, Tennessee",unified,470800,12229,4786,150
+TN,4700152,793,"Arlington Community School District, Tennessee",unified,424400,17931,3411,184
+TN,4700153,794,"Bartlett City School District, Tennessee",unified,310400,8134,2803,70
+TN,4700154,797,"Lakeland School System District, Tennessee",elementary (K-8),389500,17041,3872,222
+TN,4700180,20,"Bedford County School District, Tennessee",unified,281200,10735,1345,42
+TN,4700210,172,"Bells City School District, Tennessee",elementary (K-8),172400,20354,1186,149
+TN,4700240,30,"Benton County School District, Tennessee",unified,153600,12015,738,72
+TN,4700270,40,"Bledsoe County School District, Tennessee",unified,189400,21598,688,94
+TN,4700300,50,"Blount County School District, Tennessee",unified,316500,8332,1320,36
+TN,4700330,60,"Bradley County School District, Tennessee",unified,255600,11038,1009,51
+TN,4700360,821,"Bristol City School District, Tennessee",unified,194600,12455,1449,88
+TN,4700420,70,"Campbell County School District, Tennessee",unified,186500,13322,691,54
+TN,4700450,80,"Cannon County School District, Tennessee",unified,252000,24670,1073,111
+TN,4700510,100,"Carter County School District, Tennessee",unified,166800,5040,789,36
+TN,4700570,110,"Cheatham County School District, Tennessee",unified,338700,11253,1582,69
+TN,4700600,120,"Chester County School District, Tennessee",unified,164400,10069,856,104
+TN,4700630,130,"Claiborne County School District, Tennessee",unified,159900,9786,777,47
+TN,4700660,140,"Clay County School District, Tennessee",unified,136400,31244,769,119
+TN,4700690,61,"Cleveland City School District, Tennessee",unified,272200,14368,1576,121
+TN,4700720,11,"Clinton City School District, Tennessee",elementary (K-8),225000,27062,1189,143
+TN,4700750,150,"Cocke County School District, Tennessee",unified,163800,13283,823,68
+TN,4700780,160,"Coffee County School District, Tennessee",unified,254700,22975,1285,59
+TN,4700850,170,"Crockett County School District, Tennessee",unified,129200,27965,800,74
+TN,4700900,180,"Cumberland County School District, Tennessee",unified,250500,10266,730,28
+TN,4700930,721,"Dayton City Elementary School District, Tennessee",elementary (K-8),214900,35921,878,123
+TN,4700960,200,"Decatur County School District, Tennessee",unified,139600,16377,644,72
+TN,4700990,210,"DeKalb County School District, Tennessee",unified,235500,16790,824,56
+TN,4701020,220,"Dickson County School District, Tennessee",unified,306400,13687,1431,48
+TN,4701050,230,"Dyer County School District, Tennessee",unified,164700,13991,928,76
+TN,4701080,231,"Dyersburg City School District, Tennessee",unified,168300,12652,1471,255
+TN,4701110,101,"Elizabethton City School District, Tennessee",unified,172900,12956,1179,95
+TN,4701140,542,"Etowah City School District, Tennessee",elementary (K-8),190800,22431,923,55
+TN,4701170,240,"Fayette County School District, Tennessee",unified,340800,12502,1140,59
+TN,4701200,521,"Fayetteville City School District, Tennessee",unified,230800,34104,1302,134
+TN,4701230,250,"Fentress County School District, Tennessee",unified,168200,13978,535,46
+TN,4701260,941,"Franklin Special School District, Tennessee",elementary (K-8),614300,27041,2889,127
+TN,4701290,260,"Franklin County School District, Tennessee",unified,234100,8267,1217,56
+TN,4701390,274,"Bradford Special School District, Tennessee",unified,146600,36266,842,94
+TN,4701400,275,"Gibson County School District, Tennessee",unified,197400,22757,1239,114
+TN,4701410,280,"Giles County School District, Tennessee",unified,234300,15496,989,56
+TN,4701440,290,"Grainger County School District, Tennessee",unified,189200,36466,901,65
+TN,4701470,300,"Greene County School District, Tennessee",unified,202300,10459,805,45
+TN,4701500,301,"Greeneville City School District, Tennessee",unified,227400,17451,1429,138
+TN,4701530,310,"Grundy County School District, Tennessee",unified,154000,8605,586,62
+TN,4701590,330,"Hamilton County School District, Tennessee",unified,312800,5741,1925,36
+TN,4701620,340,"Hancock County School District, Tennessee",unified,134500,36424,599,81
+TN,4701650,350,"Hardeman County School District, Tennessee",unified,121700,7836,764,55
+TN,4701680,360,"Hardin County School District, Tennessee",unified,160400,9407,658,58
+TN,4701740,370,"Hawkins County School District, Tennessee",unified,172600,7700,921,44
+TN,4701770,380,"Haywood County School District, Tennessee",unified,152400,18940,952,94
+TN,4701800,390,"Henderson County School District, Tennessee",unified,158400,12318,699,65
+TN,4701830,400,"Henry County School District, Tennessee",unified,159600,6416,657,51
+TN,4701860,410,"Hickman County School District, Tennessee",unified,224100,15995,1038,78
+TN,4701890,92,"Hollow Rock-Bruceton Special School District, Tennessee",unified,115100,9106,909,112
+TN,4701920,420,"Houston County School District, Tennessee",unified,172700,23085,929,88
+TN,4701950,271,"Humboldt City School District, Tennessee",unified,100800,19034,809,166
+TN,4701980,430,"Humphreys County School District, Tennessee",unified,193400,11141,921,52
+TN,4702010,93,"Huntingdon Special School District, Tennessee",unified,154500,18271,846,118
+TN,4702070,440,"Jackson County School District, Tennessee",unified,155500,16677,710,83
+TN,4702100,450,"Jefferson County School District, Tennessee",unified,229300,12829,978,58
+TN,4702130,901,"Johnson City School District, Tennessee",unified,260900,14922,1686,104
+TN,4702160,460,"Johnson County School District, Tennessee",unified,178600,19569,710,58
+TN,4702190,822,"Kingsport City School District, Tennessee",unified,228800,12460,1594,107
+TN,4702220,470,"Knox County School District, Tennessee",unified,320900,5524,1367,17
+TN,4702280,480,"Lake County School District, Tennessee",unified,97900,9427,653,67
+TN,4702310,490,"Lauderdale County School District, Tennessee",unified,143200,18734,844,52
+TN,4702340,500,"Lawrence County School District, Tennessee",unified,194400,8477,1021,71
+TN,4702370,951,"Lebanon Special School District, Tennessee",elementary (K-8),379900,13516,1893,86
+TN,4702400,531,"Lenoir City School District, Tennessee",unified,252400,31109,1074,105
+TN,4702430,510,"Lewis County School District, Tennessee",unified,173400,25963,824,111
+TN,4702460,391,"Lexington City School System, Tennessee",elementary (K-8),176000,14818,964,97
+TN,4702490,520,"Lincoln County School District, Tennessee",unified,229600,16681,991,81
+TN,4702520,530,"Loudon County School District, Tennessee",unified,369000,18769,1180,52
+TN,4702550,560,"Macon County School District, Tennessee",unified,225700,12576,874,42
+TN,4702580,570,"Jackson-Madison County School System, Tennessee",unified,211800,8157,1185,68
+TN,4702610,161,"Manchester City School District, Tennessee",elementary (K-8),235700,16170,1621,126
+TN,4702640,580,"Marion County School District, Tennessee",unified,197200,12682,840,46
+TN,4702670,590,"Marshall County School District, Tennessee",unified,279800,12813,1346,60
+TN,4702700,52,"Maryville City School District, Tennessee",unified,358100,22643,2456,146
+TN,4702760,600,"Maury County School District, Tennessee",unified,355700,8714,1588,59
+TN,4702790,94,"McKenzie Special School District, Tennessee",unified,181300,27802,902,153
+TN,4702820,540,"McMinn County School District, Tennessee",unified,210000,14856,647,33
+TN,4702880,550,"McNairy County School District, Tennessee",unified,161800,8330,619,54
+TN,4702910,610,"Meigs County School District, Tennessee",unified,180000,15928,693,62
+TN,4702970,272,"Milan Special School District, Tennessee",unified,160700,9556,1302,90
+TN,4703000,620,"Monroe County School District, Tennessee",unified,238300,13151,937,47
+TN,4703030,630,"Clarksville-Montgomery County School System, Tennessee",unified,280200,5750,1697,51
+TN,4703060,640,"Moore County School District, Tennessee",unified,285300,27777,1288,166
+TN,4703090,650,"Morgan County School District, Tennessee",unified,166300,11785,871,84
+TN,4703150,751,"Murfreesboro City School District, Tennessee",elementary (K-8),402200,9159,2321,72
+TN,4703180,190,"Metropolitan Nashville Public School District, Tennessee",unified,417400,5765,2506,30
+TN,4703210,151,"Newport City School District, Tennessee",elementary (K-8),133500,20800,1314,127
+TN,4703240,12,"Oak Ridge City School District, Tennessee",unified,270200,18549,1835,118
+TN,4703270,660,"Obion County School District, Tennessee",unified,130100,11956,609,43
+TN,4703300,761,"Oneida Special School District, Tennessee",unified,187100,76552,737,347
+TN,4703330,670,"Overton County School District, Tennessee",unified,173200,16366,669,61
+TN,4703360,401,"Paris Special School District, Tennessee",elementary (K-8),164300,29235,861,144
+TN,4703390,680,"Perry County School District, Tennessee",unified,126900,19192,675,77
+TN,4703420,690,"Pickett County School District, Tennessee",unified,178500,25053,728,59
+TN,4703450,700,"Polk County School District, Tennessee",unified,169900,13999,856,70
+TN,4703480,710,"Putnam County School District, Tennessee",unified,282500,10622,1363,43
+TN,4703510,720,"Rhea County School District, Tennessee",unified,204400,14795,899,67
+TN,4703540,581,"Richard City Special School District, Tennessee",unified,133600,42887,572,119
+TN,4703590,730,"Roane County School District, Tennessee",unified,224300,9476,1136,62
+TN,4703600,740,"Robertson County School District, Tennessee",unified,335000,9263,1577,63
+TN,4703660,371,"Rogersville City Schools, Tennessee",elementary (K-8),192800,42460,1390,241
+TN,4703690,750,"Rutherford County School District, Tennessee",unified,372300,6629,1632,38
+TN,4703720,760,"Scott County School District, Tennessee",unified,121100,10049,620,86
+TN,4703750,770,"Sequatchie County School District, Tennessee",unified,232600,18366,1051,118
+TN,4703780,780,"Sevier County School District, Tennessee",unified,299000,12387,824,36
+TN,4703870,800,"Smith County School District, Tennessee",unified,243800,10339,1136,56
+TN,4703900,95,"South Carroll Special School District, Tennessee",unified,136700,40414,738,175
+TN,4703960,810,"Stewart County School District, Tennessee",unified,204700,19355,939,96
+TN,4703990,820,"Sullivan County School District, Tennessee",unified,213800,8500,1005,46
+TN,4704020,830,"Sumner County School District, Tennessee",unified,393100,6143,1987,47
+TN,4704050,621,"Sweetwater City School District, Tennessee",elementary (K-8),188600,25348,925,116
+TN,4704080,840,"Tipton County School District, Tennessee",unified,240600,7437,1211,43
+TN,4704100,273,"Trenton Special School District, Tennessee",unified,121700,14667,784,81
+TN,4704170,850,"Trousdale County School District, Tennessee",unified,337600,18826,1166,127
+TN,4704200,162,"Tullahoma City School District, Tennessee",unified,251900,18166,1684,183
+TN,4704230,860,"Unicoi County School District, Tennessee",unified,189600,16867,994,97
+TN,4704260,661,"Union City School District, Tennessee",unified,143400,21947,994,108
+TN,4704290,870,"Union County School District, Tennessee",unified,204000,15444,752,37
+TN,4704320,880,"Van Buren County School District, Tennessee",unified,159200,10494,693,147
+TN,4704350,890,"Warren County School District, Tennessee",unified,192900,14341,805,41
+TN,4704380,900,"Washington County School District, Tennessee",unified,243800,7962,1121,55
+TN,4704440,910,"Wayne County School District, Tennessee",unified,130700,17186,635,80
+TN,4704470,920,"Weakley County School District, Tennessee",unified,151200,12945,729,37
+TN,4704490,97,"West Carroll Special District, Tennessee",unified,117200,10109,673,117
+TN,4704500,930,"White County School District, Tennessee",unified,207200,15589,838,59
+TN,4704530,940,"Williamson County School District, Tennessee",unified,779100,14985,3025,68
+TN,4704550,950,"Wilson County School District, Tennessee",unified,446300,10595,1756,54

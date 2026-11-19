@@ -19,11 +19,12 @@
   // ---------------------------------------------------------------------------
   function states(sel) { return sel === "both" ? ["MS", "TN"] : [sel]; }
 
-  function unitText(d) { return d.unit === "%" ? " (%)" : d.unit === "$" ? " (2024 dollars)" : d.code === "gini" ? " (0 to 1)" : ""; }
+  function unitText(d) { return d.unitLabel ? d.unitLabel : d.unit === "%" ? " (%)" : d.unit === "$" ? " (2024 dollars)" : d.code === "gini" ? " (0 to 1)" : ""; }
 
   function indicatorsData(sel) {
-    var head = Object.keys(M.raw.ind[0]).filter(function (k) { return k !== "foodkids_est" && k !== "foodkids_moe"; });
-    head = head.concat(["foodkids_est", "foodkids_moe"]);
+    // columns from data/indicators.csv, then food (data/food.csv) and housing (data/housing.csv)
+    var extra = ["foodkids_est", "foodkids_moe", "homeval_est", "homeval_moe", "proptax_est", "proptax_moe"];
+    var head = Object.keys(M.raw.ind[0]).filter(function (k) { return extra.indexOf(k) < 0; }).concat(extra);
     var fixed = { state: "State", leaid: "Federal district ID (NCES LEA ID)", st_no: "State district number", name_census: "District name (Census)", district_type: "District type (Census)" };
     var cols = head.map(function (k) {
       if (fixed[k]) return { name: k, label: fixed[k], type: "str" };
@@ -41,9 +42,9 @@
     return {
       key: "indicators", title: "MAM district indicators", cols: cols, rows: rows,
       notes: [
-        "Seventeen indicators are from the American Community Survey 2020-2024 5-year estimates, with margins of error at 90 percent. They describe everyone living in each district, not enrolled students.",
+        "Nineteen indicators are from the American Community Survey 2020-2024 5-year estimates, with margins of error at 90 percent. They describe everyone living in each district, not enrolled students. Median home value and median property taxes count lower values as more need on the dashboard.",
         "foodkids is from the USDA ERS SNAP-Authorized Retailer Access Map (July 2026 release, driving distance, stores as of June 2025, 2020 Census). It has no margin of error.",
-        "Made by 31_dashboard_indicators.do and 33_dashboard_food.do. Sources, methods and file fingerprints are in the README."
+        "Made by 31_dashboard_indicators.do, 33_dashboard_food.do and 35_dashboard_housing.do. Sources, methods and file fingerprints are in the codebook and README."
       ]
     };
   }
@@ -134,7 +135,7 @@
         "Your choices: " + spec + ". Scaling: " + ({ rank: "ranks", minmax: "0 to 100", z: "z-scores" })[s.scale] + ".",
         "Each state is ranked on its own. The index is rounded to 9 decimals, and exact ties go to the district listed first alphabetically.",
         "Re-sharing: districts are ordered by your index, the state's actual district rates are handed out from highest to lowest in that order and multiplied by K-12 enrollment, and the counts are scaled to the state's actual total (no district above its enrollment). The weights in law are then applied.",
-        "Median household income is flipped before scaling, so lower income counts as more need. The val_ columns show the values before flipping."
+        "Median household income, median home value and median property taxes are flipped before scaling, so lower values count as more need. The val_ columns show the values before flipping."
       ]
     };
   }
@@ -326,7 +327,7 @@
     if (isMap && fmt !== "json") { $("dlFormat").value = "json"; fmt = "json"; }
     $("dl-json").textContent = isMap ? "GeoJSON" : "JSON";
     $("dlDesc").textContent = {
-      indicators: "All 18 indicators for each district, with margins of error.",
+      indicators: "All 20 indicators for each district, with margins of error.",
       funding: "K-12 enrollment, who the state counts now, and the funding rules in law.",
       results: "Your index, ranks, re-shared counts and dollars, with your choices.",
       map: "The district shapes used on the map."

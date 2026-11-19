@@ -19,7 +19,7 @@
 <meta name="twitter:title" content="Measuring Access Codebook">
 <meta name="twitter:description" content="What every variable in the Measuring Access dashboard means, how it was built, and where it comes from.">
 <meta name="twitter:image" content="https://measuringaccess.org/assets/share-card.png">
-<link rel="stylesheet" href="style.css?v=20261119b">
+<link rel="stylesheet" href="style.css?v=20261119d">
 <style>
   .cb h2 { margin-top: 8px; }
   .cb h3 { margin-top: 22px; }
@@ -45,7 +45,7 @@
 <main class="wrap cb">
   <div class="panel">
     <p><a href="./">Back to the dashboard</a></p>
-    <p>This codebook covers every column in the dashboard's downloads. Each variable lists its name in the file, what it holds in plain words, how it was built, its source, and the numbered decision behind it. The decision numbers (D061 to D074) refer to the MAM census database's decision log.</p>
+    <p>This codebook covers every column in the dashboard's downloads. Each variable lists its name in the file, what it holds in plain words, how it was built, its source, and the numbered decision behind it. The decision numbers (D061 to D075) refer to the MAM census database's decision log.</p>
     <ol class="toc">
       <li><a href="#pipeline">How the data were built</a></li>
       <li><a href="#units">Districts and IDs</a></li>
@@ -71,6 +71,7 @@
           <li><code>32_dashboard_map.do</code>: the simplified district shapes.</li>
           <li><code>33_dashboard_food.do</code>: the food access indicator.</li>
           <li><code>34_dashboard_neighbors.do</code>: which districts border each other.</li>
+          <li><code>35_dashboard_housing.do</code>: median home value and property taxes.</li>
         </ul>
       </li>
       <li><strong>Check.</strong> Each product was recomputed separately in Python, cell by cell, before it went on the dashboard.</li>
@@ -121,7 +122,7 @@
 
   <div class="panel" id="indicators">
     <h2>Indicators</h2>
-    <p>Each indicator has two columns: <code>_est</code> (the value) and <code>_moe</code> (its margin of error). Seventeen are from the ACS 2020-2024 5-year estimates (D069). Food access is from USDA (D073). Higher means more need for every indicator except median household income, which is flipped so lower income counts as more need. Groups follow the dashboard's domains (D072, D073).</p>
+    <p>Each indicator has two columns: <code>_est</code> (the value) and <code>_moe</code> (its margin of error). Nineteen are from the ACS 2020-2024 5-year estimates (D069, D075). Food access is from USDA (D073). Higher means more need for every indicator except median household income, median home value and median property taxes, which are flipped so lower values count as more need. Groups follow the dashboard's domains (D072, D073).</p>
 
     <h3>Income and work</h3>
     <div class="dtablewrap"><table class="dtable">
@@ -147,6 +148,8 @@
       <tr><td><code>crowd</code></td><td>Households with more than 1 person per room (%)</td><td>Built from counts. Numerator: owner and renter households with 1.01 to 1.50, 1.51 to 2.00, or 2.01 or more people per room. Denominator: all occupied housing units. Times 100.</td><td class="src">ACS B25014_005, _006, _007, _011, _012, _013, over B25014_001</td><td class="dec">D069</td></tr>
       <tr><td><code>plumb</code></td><td>Households lacking complete plumbing (%)</td><td>Built from counts. Numerator: owner and renter households lacking plumbing facilities. Denominator: all occupied housing units. Times 100.</td><td class="src">ACS B25049_004 + _007, over B25049_001</td><td class="dec">D069</td></tr>
       <tr><td><code>rentburden</code></td><td>Renter households paying 35% or more of income on rent (%)</td><td>Built from counts. Numerator: renters paying 35.0 to 39.9%, 40.0 to 49.9%, or 50% or more. Denominator: all renter households minus those whose share could not be computed. Times 100.</td><td class="src">ACS B25070_008 + _009 + _010, over B25070_001 minus B25070_011</td><td class="dec">D069</td></tr>
+      <tr><td><code>homeval</code></td><td>Median value of owner-occupied homes (dollars)</td><td>As published. Lower counts as more need: home value stands for household wealth, as in deprivation indices such as the Area Deprivation Index and the Child Opportunity Index 3.0. In costly areas high prices can hide hardship, and rent burden covers housing cost for families. Downloads show the value before flipping.</td><td class="src">ACS B25077_001 (table added to the download in D075)</td><td class="dec">D075</td></tr>
+      <tr><td><code>proptax</code></td><td>Median real estate taxes paid on owner-occupied homes (dollars per year)</td><td>As published. Lower counts as more need: less local tax capacity. Downloads show the value before flipping.</td><td class="src">ACS B25103_001 (table added to the download in D075)</td><td class="dec">D075</td></tr>
       <tr><td><code>moved</code></td><td>People 1 and over who lived in a different house a year ago (%)</td><td>Built from counts. Numerator: everyone 1 and over minus those in the same house a year ago. Denominator: everyone 1 and over. Times 100.</td><td class="src">ACS B07003_001 minus B07003_004, over B07003_001</td><td class="dec">D069</td></tr>
     </table></div>
 
@@ -197,8 +200,8 @@
     <p>Computed in the browser from your choices (D064, D065, D071). Each state is ranked on its own. With both states in one file, each state's rows are still ranked within that state.</p>
     <div class="dtablewrap"><table class="dtable">
       <tr><th>Name in file</th><th>What it is</th><th>How it was built</th><th>Decision</th></tr>
-      <tr><td><code>val_</code><em>indicator</em></td><td>The district's value on each indicator you chose</td><td>The <code>_est</code> value from the indicators file, before flipping.</td><td class="dec">D069</td></tr>
-      <tr><td><code>sc_</code><em>indicator</em></td><td>That value after scaling</td><td>Median household income is flipped first (multiplied by −1). Then, across the state's districts:
+      <tr><td><code>val_</code><em>indicator</em></td><td>The district's value on each indicator you chose</td><td>The <code>_est</code> value from the data files, before flipping.</td><td class="dec">D069</td></tr>
+      <tr><td><code>sc_</code><em>indicator</em></td><td>That value after scaling</td><td>Median household income, median home value and median property taxes are flipped first (multiplied by −1). Then, across the state's districts:
         <ul>
           <li><strong>Ranks:</strong> the share of the other districts with a lower value, times 100.</li>
           <li><strong>0 to 100:</strong> (value − lowest) / (highest − lowest) × 100.</li>
@@ -245,6 +248,7 @@
       <tr><td><code>indicators.csv</code></td><td><code>31_dashboard_indicators.do</code></td><td><code>8c870d39bc5a687368738076dbd63eee73402c34c9a0ec67f26b6c155395010b</code></td></tr>
       <tr><td><code>map.geojson</code></td><td><code>32_dashboard_map.do</code></td><td><code>1101a3c55047a759cff6ddda4b04fe54520e19779fc23b4d85456ebddb90cc02</code></td></tr>
       <tr><td><code>food.csv</code></td><td><code>33_dashboard_food.do</code></td><td><code>09e699a888f049d0f6bae32380924b46135f9444dec8a0bb8c8c63355933f6ef</code></td></tr>
+      <tr><td><code>housing.csv</code></td><td><code>35_dashboard_housing.do</code></td><td><code>e9104cdecfcc7991319195ea2dad9f618696b577d2d0e159f371785f4af7a0c2</code></td></tr>
       <tr><td><code>neighbors.csv</code></td><td><code>34_dashboard_neighbors.do</code></td><td><code>06b550f90b61e61bfc12ec76f108aabd5f7dbe9e7cc511350d69a2a27ad19574</code></td></tr>
     </table></div>
     <p>Full sources, with links, are in the <a href="https://github.com/jmfreder123/mam-dashboard#readme">README</a>.</p>

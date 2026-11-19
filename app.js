@@ -16,6 +16,8 @@
     { code: "crowd", domain: "needs", label: "Crowded housing", unit: "%", dir: 1, desc: "Households with more than one person per room." },
     { code: "plumb", domain: "needs", label: "No complete plumbing", unit: "%", dir: 1, desc: "Households lacking complete plumbing." },
     { code: "rentburden", domain: "needs", label: "Rent burden", unit: "%", dir: 1, desc: "Renter households paying 35 percent or more of income on rent." },
+    { code: "homeval", domain: "needs", label: "Median home value", unit: "$", dir: -1, desc: "The middle value of owner-occupied homes. Half are worth more and half less.", note: "Lower value counts as more need (less household wealth)." },
+    { code: "proptax", domain: "needs", label: "Median property taxes", unit: "$", unitLabel: " (dollars)", dir: -1, desc: "The middle amount of yearly real estate taxes paid on owner-occupied homes.", note: "Lower taxes count as more need (less local tax capacity)." },
     { code: "moved", domain: "needs", label: "Moved in the past year", unit: "%", dir: 1, desc: "People 1 and over who lived in a different house a year ago." },
     { code: "noveh", domain: "access", label: "No vehicle", unit: "%", dir: 1, desc: "Households with no vehicle available." },
     { code: "nobb", domain: "access", label: "No broadband", unit: "%", dir: 1, desc: "Households without a broadband internet subscription of any type." },
@@ -111,13 +113,18 @@
     return rows.map(function (r) { var o = {}; h.forEach(function (k, j) { o[k] = r[j]; }); return o; });
   }
 
-  function build(dist, ind, food) {
+  function build(dist, ind, food, housing) {
     var byId = {};
     ind.forEach(function (r) { byId[r.leaid] = r; });
     // food access comes from its own file (decision D073); its moe column is empty
     food.forEach(function (r) {
       var x = byId[r.leaid];
       if (x) { x.foodkids_est = r.foodkids_est; x.foodkids_moe = r.foodkids_moe; }
+    });
+    // housing comes from its own file (decision D075)
+    housing.forEach(function (r) {
+      var x = byId[r.leaid];
+      if (x) { x.homeval_est = r.homeval_est; x.homeval_moe = r.homeval_moe; x.proptax_est = r.proptax_est; x.proptax_moe = r.proptax_moe; }
     });
     dist.forEach(function (d) {
       var x = byId[d.leaid];
@@ -417,7 +424,7 @@
       { key: "rank", head: "Your rank", n: true, get: function (o) { return o.rank; }, show: function (o) { return String(o.rank); } },
       { key: "moved", head: "Moved", n: true, get: function (o) { return o.curRank - o.rank; }, show: function (o) { return movedText(o.curRank - o.rank); } },
       { key: "enroll", head: "K-12 students", n: true, get: function (o) { return o.r.enroll; }, show: function (o) { return fmtN(o.r.enroll); } },
-      { key: "curPct", head: "Counted now", n: true, get: function (o) { return o.curCount / o.r.enroll; }, show: function (o) { return fmtN(100 * o.curCount / o.r.enroll, 1) + "%"; } },
+      { key: "curPct", head: "State's current poverty count", n: true, get: function (o) { return o.curCount / o.r.enroll; }, show: function (o) { return fmtN(100 * o.curCount / o.r.enroll, 1) + "%"; } },
       { key: "newPct", head: "Under your index", n: true, get: function (o) { return o.newCount / o.r.enroll; }, show: function (o) { return fmtN(100 * o.newCount / o.r.enroll, 1) + "%"; } },
       { key: "cur", head: "Dollars now", n: true, get: function (o) { return o.curDollars; }, show: function (o) { return money(o.curDollars); } },
       { key: "new", head: "Under your index", n: true, get: function (o) { return o.newDollars; }, show: function (o) { return money(o.newDollars); } },
@@ -526,12 +533,12 @@
       key(needCols[0], "lowest fifth"); key(needCols[1], ""); key(needCols[2], ""); key(needCols[3], ""); key(needCols[4], "highest fifth of need");
       note.textContent = "Districts ranked by your index within " + LAW[state.st].name + ". Hover over a district for a quick look, or click it to zoom in.";
     } else {
-      title.textContent = "Counted now";
+      title.textContent = "State's current poverty count";
       var pr = R.map(function (o) { return o.r.basePct; });
       var rk = rankDesc(pr);
       cls = rk.map(function (r) { return needCols[4 - Math.min(4, Math.floor((r - 1) * 5 / n))]; });
       key(needCols[0], "lowest fifth"); key(needCols[1], ""); key(needCols[2], ""); key(needCols[3], ""); key(needCols[4], "highest fifth");
-      note.textContent = "Share of students the state counts now: " + LAW[state.st].measure + ". Choose indicators to see your index. Click a district to zoom in.";
+      note.textContent = "Share of each district's students in the state's current poverty count: " + LAW[state.st].measure + ". Choose indicators to see your index. Click a district to zoom in.";
     }
     rows().forEach(function (r, i) { var p = projected[r.leaid]; if (p) p.setAttribute("fill", cls[i]); });
     ["index", "money", "rank"].forEach(function (v) { $("mv-" + v).setAttribute("aria-checked", String(state.view === v)); });
@@ -543,7 +550,7 @@
     var law = LAW[state.st], r = o.r, lines = [];
     lines.push(r.type !== "unified" ? "City K-8 system" : "Unified district");
     lines.push(fmtN(r.enroll) + " K-12 students");
-    lines.push("Counted now: " + fmtN(o.curCount, 0) + " (" + fmtN(100 * o.curCount / r.enroll, 1) + "%), " + money(o.curDollars));
+    lines.push("State's current poverty count: " + fmtN(o.curCount, 0) + " (" + fmtN(100 * o.curCount / r.enroll, 1) + "%), " + money(o.curDollars));
     if (o.rank) {
       lines.push("Need rank: " + o.rank + " of " + rows().length);
       lines.push("Under your index: " + fmtN(o.newCount, 0) + " (" + fmtN(100 * o.newCount / r.enroll, 1) + "%), " + money(o.newDollars));
@@ -711,7 +718,7 @@
     var r = o.r, law = LAW[state.st], dl = el("dl", { class: "facts" });
     addFact(dl, "Type", r.type !== "unified" ? "City K-8 system" : "Unified district (K-12)");
     addFact(dl, "K-12 students", fmtN(r.enroll));
-    addFact(dl, "Counted now", fmtN(o.curCount, 0) + " " + law.who + " students (" + fmtN(100 * o.curCount / r.enroll, 1) + "%)");
+    addFact(dl, "State's current poverty count", fmtN(o.curCount, 0) + " " + law.who + " students (" + fmtN(100 * o.curCount / r.enroll, 1) + "%)");
     addFact(dl, "Poverty money now", money(o.curDollars));
     return dl;
   }
@@ -811,7 +818,7 @@
     var nb = (NBR[r.leaid] || []).map(rowOf).filter(Boolean).sort(function (a, b) { return a.r.name < b.r.name ? -1 : 1; });
     page.appendChild(el("h3", null, "Bordering districts (" + nb.length + ")"));
     var wrap = el("div", { class: "dtablewrap" }), t = el("table", { class: "dtable" }), hr = el("tr");
-    var heads = [["District", ""], ["Students", "n"], ["Counted now", "n"], ["Rank now", "n"]];
+    var heads = [["District", ""], ["Students", "n"], ["State's current poverty count", "n"], ["Rank now", "n"]];
     if (lastRes.ok) heads = heads.concat([["Your rank", "n"], ["Change / student", "n"]]);
     heads.forEach(function (c) { hr.appendChild(el("th", c[1] ? { class: c[1] } : null, c[0])); });
     t.appendChild(hr);
@@ -878,7 +885,7 @@
     }
     R.slice().sort(function (a, b) { return a.curRank - b.curRank; }).forEach(function (o) { now.appendChild(li(o.curRank, o, false)); });
     if (!res.ok) {
-      $("rankNote").textContent = "Left: " + n + " " + law.name + " districts ranked by the share of students the state counts now (" + law.measure + "). Choose indicators to see your ranking beside it.";
+      $("rankNote").textContent = "Left: " + n + " " + law.name + " districts ranked by the state's current poverty count, as a share of students (" + law.measure + "). Choose indicators to see your ranking beside it.";
       yours.appendChild(el("li", { class: "empty" }, "Choose indicators to rank districts."));
       up.appendChild(el("li", null, "Choose indicators first."));
       return;
@@ -1051,11 +1058,12 @@
     fetch("data/indicators.csv").then(function (r) { return r.text(); }),
     fetch("data/map.geojson").then(function (r) { return r.json(); }),
     fetch("data/food.csv").then(function (r) { return r.text(); }),
-    fetch("data/neighbors.csv").then(function (r) { return r.text(); })
+    fetch("data/neighbors.csv").then(function (r) { return r.text(); }),
+    fetch("data/housing.csv").then(function (r) { return r.text(); })
   ]).then(function (x) {
     parseCSV(x[4]).forEach(function (r) { (NBR[r.leaid] = NBR[r.leaid] || []).push(r.neighbor_leaid); });
-    RAW.dist = parseCSV(x[0]); RAW.ind = parseCSV(x[1]); RAW.food = parseCSV(x[3]); RAW.map = x[2];
-    build(RAW.dist, RAW.ind, RAW.food);
+    RAW.dist = parseCSV(x[0]); RAW.ind = parseCSV(x[1]); RAW.food = parseCSV(x[3]); RAW.housing = parseCSV(x[5]); RAW.map = x[2];
+    build(RAW.dist, RAW.ind, RAW.food, RAW.housing);
     FEATURES.MS = x[2].features.filter(function (f) { return f.properties.leaid.slice(0, 2) === "28"; });
     FEATURES.TN = x[2].features.filter(function (f) { return f.properties.leaid.slice(0, 2) === "47"; });
     load();

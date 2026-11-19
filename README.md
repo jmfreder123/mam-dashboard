@@ -8,7 +8,7 @@ It is a static page. Nothing is installed, and nothing a user enters leaves thei
 
 Each state is ranked on its own. Users go through four steps after a short introduction. Clicking a step's name at the top opens it, and a step opens only once the steps before it are complete (at least two indicators, and weights that add up to 100):
 
-1. **Indicators.** Pick four to six of 18 indicators. The page flags pairs that move closely together (correlation of 0.8 or more within the state), since counting both gives that idea extra weight.
+1. **Indicators.** Pick four to six of 20 indicators. The page flags pairs that move closely together (correlation of 0.8 or more within the state), since counting both gives that idea extra weight.
 2. **Weights.** Split 100 points among the chosen indicators.
 3. **Scaling.** Choose ranks, 0 to 100, or z-scores. A small table shows how five districts score under each method.
 4. **Money.** See which districts would gain or lose poverty-weight dollars.
@@ -25,7 +25,7 @@ The full district table in the money step also shows each district's rank now, i
 
 Clicking a district on the map (or selecting it with the keyboard and pressing Enter) zooms the map to that district and the districts that border it. A short panel under the map shows its basic facts, how it does under the user's index, and its bordering districts, which can be clicked in turn. "Whole state" or the Escape key zooms back out.
 
-The panel opens a full district page in place of the steps. It shows all 18 indicators with the district's value, margin of error, the state median and its need rank on each (1 is the most need, and equal values share a rank), plus a table comparing it with its bordering districts. Each district page has its own link, for example `#district-2800750`.
+The panel opens a full district page in place of the steps. It shows all 20 indicators with the district's value, margin of error, the state median and its need rank on each (1 is the most need, and equal values share a rank), plus a table comparing it with its bordering districts. Each district page has its own link, for example `#district-2800750`.
 
 Bordering districts come from `data/neighbors.csv`. Two districts border each other if they are in the same state and share at least 0.00001 degrees (about 1 meter) of border in the full 2024 TIGER/Line boundaries. Districts that touch only at a corner do not count. The full boundaries are used because working this out from the simplified map shapes gave 16 wrong pairs out of 655.
 
@@ -37,7 +37,7 @@ For each chosen indicator, every district in the state is scaled one of three wa
 - **0 to 100:** (value − minimum) / (maximum − minimum) × 100.
 - **z-scores:** (value − mean) / population standard deviation.
 
-Median household income is flipped, so lower income counts as more need. Every other indicator, including the Gini index, counts higher as more need. The index is the weighted average of the scaled values, rounded to 9 decimals. Rank 1 is the most need, and exact ties go to the district listed first alphabetically.
+Median household income, median home value and median property taxes are flipped, so lower values count as more need. Every other indicator, including the Gini index, counts higher as more need. The index is the weighted average of the scaled values, rounded to 9 decimals. Rank 1 is the most need, and exact ties go to the district listed first alphabetically.
 
 ### Funding
 
@@ -85,7 +85,7 @@ A **Choose columns** box lets them keep only some columns, grouped like the indi
 
 Every file is built in the browser from the files in `data/`. Nothing is sent anywhere.
 
-- **Indicators:** the columns of `data/indicators.csv` plus `foodkids_est` and `foodkids_moe` from `data/food.csv`. The CSV keeps the numbers exactly as they are written in those files.
+- **Indicators:** the columns of `data/indicators.csv` plus food access from `data/food.csv` and median home value and property taxes from `data/housing.csv`. The CSV keeps the numbers exactly as they are written in those files.
 - **Funding inputs:** the columns of `data/districts.csv` plus the funding rules in law for each state (formula, year, base amount, poverty weight, concentrated poverty weight and line).
 - **Your results:** for each district, the value, scaled value and weight of each chosen indicator, the scaling method, the index, rank now, rank under the index, places moved, students counted now and after re-sharing, poverty-weight dollars now and after, and the change in total and per student. With both states, each state is still ranked on its own.
 - **Map boundaries:** the features of `data/map.geojson` for the chosen state.
@@ -103,7 +103,7 @@ There are 277 districts: the school systems each state's formula pays.
 
 ## Indicators
 
-Seventeen indicators come from the ACS 2020-2024 5-year estimates. Food access comes from USDA. The indicators are grouped into five domains for now. These will be renamed to MAM domains as more domains are added.
+Nineteen indicators come from the ACS 2020-2024 5-year estimates. Food access comes from USDA. The indicators are grouped into five domains for now. These will be renamed to MAM domains as more domains are added.
 
 | Domain | Indicator | Source |
 |---|---|---|
@@ -118,6 +118,8 @@ Seventeen indicators come from the ACS 2020-2024 5-year estimates. Food access c
 | Health and housing | Crowded housing (more than 1 person per room) | B25014, built |
 | Health and housing | No complete plumbing | B25049, built |
 | Health and housing | Rent burden (35% or more of income) | B25070, built ("not computed" left out) |
+| Health and housing | Median home value (lower counts as more need) | B25077_001 |
+| Health and housing | Median property taxes (lower counts as more need) | B25103_001 |
 | Health and housing | Moved in the past year | B07003, built |
 | Getting around and getting online | No vehicle | S2504_C02_027 |
 | Getting around and getting online | No broadband | 100 − S2801_C02_014 |
@@ -151,6 +153,7 @@ The files in `data/` are exact copies of products from the MAM census database. 
 | `data/map.geojson` | `32_dashboard_map.do`, run dashmap_20261119T001806Z | `1101a3c55047a759cff6ddda4b04fe54520e19779fc23b4d85456ebddb90cc02` |
 | `data/food.csv` | `33_dashboard_food.do`, run dashfood_20261119T164127Z | `09e699a888f049d0f6bae32380924b46135f9444dec8a0bb8c8c63355933f6ef` |
 | `data/neighbors.csv` | `34_dashboard_neighbors.do`, run dashnbr_20261119T180245Z | `06b550f90b61e61bfc12ec76f108aabd5f7dbe9e7cc511350d69a2a27ad19574` |
+| `data/housing.csv` | `35_dashboard_housing.do`, run dashhouse_20261119T200703Z | `e9104cdecfcc7991319195ea2dad9f618696b577d2d0e159f371785f4af7a0c2` |
 
 Sources behind them:
 
@@ -168,14 +171,14 @@ Sources behind them:
   - [Mississippi Student Funding Formula, TPC](https://tpcref.org/mississippi-student-funding-formula/)
   - [George County School District FY26 budget hearing](https://irp.cdn-website.com/5877256e/files/uploaded/2025-2026+Public+Hearing+July+29-+2025.pdf)
 
-The decisions behind these choices are numbered D063 to D074 in the database's decision log.
+The decisions behind these choices are numbered D063 to D075 in the database's decision log.
 
 ## Files
 
 - `index.html`, `style.css`, `app.js`: the page
 - `dl.js`: the downloads (CSV, Excel, Stata and JSON writers)
 - `codebook.html`: what every variable means, how it was built, its source and the decision behind it
-- `data/`: the five data files above
+- `data/`: the six data files above
 
 The page loads `style.css`, `app.js` and `dl.js` with a version tag (`?v=...`). Change the tag whenever one of those files changes, so browsers fetch the new copy instead of an old saved one.
 
