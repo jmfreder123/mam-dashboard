@@ -180,6 +180,9 @@ ol.ranklist .mv.same { color: var(--soft); font-weight: 400; }
 ol.ranklist li.hl { background: var(--warn-bg); }
 ol.ranklist li.empty { display: block; color: var(--soft); }
 .barbtns { display: flex; gap: 8px; flex-wrap: wrap; }
+.barlink { display: inline-flex; align-items: center; font-weight: 600; font-size: 14px; padding: 5px 12px; border: 2px solid var(--accent); color: var(--accent); background: transparent; text-decoration: none; }
+.barlink:hover { background: var(--accent); color: var(--accent-ink); }
+.barlink:focus-visible { outline: 3px solid var(--good); outline-offset: 2px; }
 .datapanel { margin-top: 8px; }
 .datapanel h2:focus { outline: none; }
 .dlgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px 20px; margin: 8px 0 4px; }
