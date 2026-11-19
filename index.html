@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MAM Dashboard</title>
+<meta name="description" content="Build a multidimensional index of student need for Mississippi and Tennessee school districts from American Community Survey data, and see how it would move poverty-weight funding under each state's formula.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <p class="eyebrow">Measuring Access · Draft</p>
+    <h1>MAM Dashboard</h1>
+    <p class="sub">Mississippi and Tennessee school districts · American Community Survey 2020–2024</p>
+  </div>
+</header>
+
+<div class="wrap bar">
+  <div class="statepick" role="radiogroup" aria-label="State">
+    <button type="button" class="seg" id="st-MS" role="radio" aria-checked="true" data-state="MS">Mississippi</button>
+    <button type="button" class="seg" id="st-TN" role="radio" aria-checked="false" data-state="TN">Tennessee</button>
+  </div>
+  <nav aria-label="Steps"><ol id="stepper"></ol></nav>
+  <button type="button" class="ghost small" id="resetBtn">Start over</button>
+</div>
+
+<main class="wrap layout">
+  <section class="steps-col" aria-label="Build your index">
+
+    <!-- Step 0 -->
+    <div class="panel" data-step="0">
+      <h2>The task</h2>
+      <p>Both states give school districts extra money for students in poverty. Tennessee's funding formula (TISA) adds 25 percent of the base amount for each economically disadvantaged student. Mississippi's formula (MSFF) adds 30 percent for each low-income student, plus 10 percent for low-income students above 35 percent of a district's enrollment.</p>
+      <p>Both states decide who counts mainly through direct certification: students whose families receive SNAP or TANF, plus students who are homeless, in foster care or migrant. Here you build a broader measure of need from census data, and see how the same poverty money would move if your measure decided which districts have the most need.</p>
+      <div class="callout">
+        <p><strong>What stays fixed.</strong> Everything set in law: the base amount, the weights, and the state's total number of students who count. You choose only which kinds of need matter and how much.</p>
+      </div>
+      <p class="muted">Each state is ranked on its own. Use the switch above to change states. About 15 minutes.</p>
+    </div>
+
+    <!-- Step 1 -->
+    <div class="panel" data-step="1" hidden>
+      <h2>Step 1. Choose your indicators</h2>
+      <p>Pick four to six. Each one describes the people living in a district. What counts as student need?</p>
+      <p class="count" id="pickCount" aria-live="polite"></p>
+      <div class="cards" id="indicatorCards"></div>
+      <div class="warn" id="corrWarn" aria-live="polite"></div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="panel" data-step="2" hidden>
+      <h2>Step 2. Set your weights</h2>
+      <p>Split 100 points among your indicators. A bigger weight means that indicator matters more in your index.</p>
+      <div class="weights" id="weights"></div>
+      <div class="row between">
+        <button type="button" class="ghost" id="evenBtn">Split evenly</button>
+        <p class="total" id="weightTotal" aria-live="polite"></p>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="panel" data-step="3" hidden>
+      <h2>Step 3. Choose a scaling method</h2>
+      <p>Your indicators are on different scales. Scaling puts them on a common footing before they are added up.</p>
+      <fieldset class="choices" id="scaleChoices">
+        <legend class="sr">Scaling method</legend>
+        <label class="choice"><input type="radio" name="scale" value="rank" id="sc-rank" checked>
+          <span><strong>Ranks.</strong> Each district gets its percentile rank on the indicator, from 0 to 100. Only order matters, so an extreme district counts no more than the next one down.</span></label>
+        <label class="choice"><input type="radio" name="scale" value="minmax" id="sc-minmax">
+          <span><strong>0 to 100.</strong> The lowest district is 0 and the highest is 100, with the rest in proportion. One extreme district squeezes everyone else together.</span></label>
+        <label class="choice"><input type="radio" name="scale" value="z" id="sc-z">
+          <span><strong>z-scores.</strong> Distance from the state average in standard deviations. Extreme districts pull hardest.</span></label>
+      </fieldset>
+      <div class="example" id="scaleExample"></div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="panel" data-step="4" hidden>
+      <h2>Step 4. Follow the money</h2>
+      <p id="fundIntro"></p>
+      <div class="stats" id="fundStats"></div>
+      <div class="two">
+        <div><h3>Largest gains</h3><ol class="plain moves" id="gainList"></ol></div>
+        <div><h3>Largest losses</h3><ol class="plain moves" id="lossList"></ol></div>
+      </div>
+      <details class="how">
+        <summary>How the students are re-shared</summary>
+        <ol>
+          <li>Districts are ordered by your index, highest need first.</li>
+          <li>The state's actual district rates are sorted from highest to lowest and handed out in that order. The district your index ranks first gets the highest real rate, and so on.</li>
+          <li>Each rate is multiplied by the district's K-12 enrollment. The counts are then scaled so the statewide total matches the actual total, and no district can have more students than it enrolls.</li>
+          <li>The law's weights are applied to the new counts.</li>
+        </ol>
+        <p id="fundNote" class="muted"></p>
+      </details>
+      <details>
+        <summary>All districts</summary>
+        <div class="tablewrap"><table id="fullTable"></table></div>
+      </details>
+    </div>
+
+    <!-- Step 5 -->
+    <div class="panel" data-step="5" hidden>
+      <h2>Step 5. Reflect</h2>
+      <label class="field" for="q1">1. Which indicators did you choose, and why?
+        <textarea id="q1" rows="3"></textarea></label>
+      <label class="field" for="q2">2. Which districts gained the most under your index? What do they have in common?
+        <textarea id="q2" rows="3"></textarea></label>
+      <label class="field" for="q3">3. Which one decision changed the money the most?
+        <textarea id="q3" rows="3"></textarea></label>
+      <p class="muted">Your answers stay in this browser.</p>
+    </div>
+
+    <div class="nav row between">
+      <button type="button" class="ghost" id="backBtn">Back</button>
+      <p class="hint" id="navHint" aria-live="polite"></p>
+      <button type="button" id="nextBtn">Next</button>
+    </div>
+  </section>
+
+  <aside class="live" aria-label="Live results">
+    <div class="panel livepanel">
+      <div class="row between maphead">
+        <h2 id="mapTitle">Your index</h2>
+        <div class="seg-sm" role="radiogroup" aria-label="Map view">
+          <button type="button" class="seg" id="mv-index" data-view="index" aria-checked="true" role="radio">Need</button>
+          <button type="button" class="seg" id="mv-money" data-view="money" aria-checked="false" role="radio">Funding change</button>
+        </div>
+      </div>
+      <div class="mapbox"><svg id="map" role="img" aria-labelledby="mapTitle"></svg><div class="tip" id="tip" hidden></div></div>
+      <div class="legend" id="legend"></div>
+      <p class="muted small" id="mapNote"></p>
+      <h3>Top ten by your index</h3>
+      <ol class="toplist" id="topList"></ol>
+    </div>
+  </aside>
+</main>
+
+<footer class="wrap foot">
+  <p>Data: U.S. Census Bureau, American Community Survey 2020–2024 5-year estimates; TDOE district profile 2024-25; MDE enrollment 2024-25 and Office of Child Nutrition CEP list (April 14, 2025); NCES Common Core of Data 2024-25 directory; Census TIGER/Line 2024 school district boundaries. Census figures describe everyone living in each district, not enrolled students. See the <a href="https://github.com/jmfreder123/mam-dashboard#readme">README</a> for sources, file fingerprints and method.</p>
+  <p>Draft. Built by John M. Fredericks, Arizona State University.</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
