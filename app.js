@@ -373,10 +373,10 @@
   function renderMoney(res) {
     var law = LAW[state.st];
     var perStudent = law.w * law.base;
-    $("fundIntro").textContent = law.formula + " (" + law.name + ", " + law.year + ") pays " + money(perStudent) + " for each " + law.who + " student: " +
-      fmtN(law.w * 100, 0) + "% of the " + money(law.base) + " base" +
-      (law.cpW ? ", plus " + money(law.cpW * law.base) + " for each low-income student above " + fmtN(law.cpLine * 100, 0) + "% of a district's enrollment." : ".") +
-      " Below, the same students are shared out by your index instead of by the state's current measure.";
+    $("fundIntro").textContent = law.name + "'s formula gives a district an extra " + money(perStudent) + " for each " + law.who + " student. That is " +
+      fmtN(law.w * 100, 0) + "% of the " + money(law.base) + " the state starts with for every student." +
+      (law.cpW ? " A district also gets " + money(law.cpW * law.base) + " more for each " + law.who + " student beyond " + fmtN(law.cpLine * 100, 0) + "% of its enrollment." : "") +
+      " Below, the state still counts the same total number of " + law.who + " students, but your index decides which districts they are counted in.";
     $("fundNote").textContent = state.st === "TN"
       ? "Current counts: TDOE district profile 2024-25, economically disadvantaged percent (published as a whole number) times K-12 enrollment. Tennessee's 5% concentrated-poverty weight is set school by school, so it stays as it is and is not part of this comparison."
       : "Current counts: MDE Office of Child Nutrition CEP list (April 14, 2025), identified student percentage, times MDE K-12 enrollment for 2024-25. This is the school meals measure, close to but not confirmed identical to the count MSFF uses. The FY26 base of $6,842.61 is from a district's FY26 budget hearing, not yet confirmed in an MDE document.";
@@ -387,7 +387,7 @@
     var cur = R.reduce(function (s, o) { return s + o.curDollars; }, 0);
     function stat(big, lbl) { var d = el("div", { class: "stat" }); d.appendChild(el("span", { class: "big" }, big)); d.appendChild(el("span", { class: "lbl" }, lbl)); stats.appendChild(d); }
     if (!res.ok) {
-      stat(shortMoney(cur), "poverty-weight dollars now");
+      stat(shortMoney(cur), "Extra money for students in poverty today");
       gl.appendChild(el("li", null, "Choose indicators and weights to see changes."));
       return;
     }
@@ -395,10 +395,11 @@
     var gain = R.filter(function (o) { return o.change > 0.5; }).length;
     var loss = R.filter(function (o) { return o.change < -0.5; }).length;
     var moved = R.reduce(function (s, o) { return s + Math.max(0, o.change); }, 0);
-    stat(shortMoney(cur), "poverty-weight dollars now");
-    stat(shortMoney(nw), "under your index" + (state.st === "MS" ? " (the 35% rule can change the total)" : " (same total)"));
-    stat(shortMoney(moved), "moves to districts that gain");
-    stat(gain + " / " + loss, "districts gain / lose");
+    stat(shortMoney(cur), "Extra money for students in poverty today");
+    stat(shortMoney(nw), "The same money if your index decided who counts. " + (state.st === "MS" ? "In Mississippi the total can shift a little because of the extra for districts above 35%." : "The total stays the same."));
+    stat(shortMoney(moved), "Moves from some districts to others");
+    stat(String(gain), "Districts that would get more");
+    stat(String(loss), "Districts that would get less");
     var byGain = R.slice().sort(function (a, b) { return b.change - a.change; });
     function moveItem(o) {
       var li = el("li");
