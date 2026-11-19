@@ -1,6 +1,6 @@
 # MAM Dashboard
 
-A draft dashboard for the Measuring Access (MAM) project. Users build a multidimensional index of student need for Mississippi and Tennessee school districts from American Community Survey data. They then see how each state's poverty-weight funding would move if their index, instead of the state's current measure, decided which districts have the most need.
+A draft dashboard for the Measuring Access (MAM) project. Users build a multidimensional index of student need for Mississippi and Tennessee school districts from American Community Survey and USDA food access data. They then see how each state's poverty-weight funding would move if their index, instead of the state's current measure, decided which districts have the most need.
 
 It is a static page. Nothing is installed, and nothing a user enters leaves their browser.
 
@@ -8,7 +8,7 @@ It is a static page. Nothing is installed, and nothing a user enters leaves thei
 
 Each state is ranked on its own. Users go through five steps:
 
-1. **Indicators.** Pick four to six of 17 census indicators. The page flags pairs that move closely together (correlation of 0.8 or more within the state), since counting both gives that idea extra weight.
+1. **Indicators.** Pick four to six of 18 indicators. The page flags pairs that move closely together (correlation of 0.8 or more within the state), since counting both gives that idea extra weight.
 2. **Weights.** Split 100 points among the chosen indicators.
 3. **Scaling.** Choose ranks, 0 to 100, or z-scores. A small table shows how five districts score under each method.
 4. **Money.** See which districts would gain or lose poverty-weight dollars.
@@ -71,23 +71,24 @@ There are 277 districts: the school systems each state's formula pays.
   - **County high-school pieces:** the 16 census "secondary" pieces are county high-school areas inside those cities. Their students are funded through the county system, so they are not shown separately. A county system is described by the census numbers for its own K-12 area only.
   - **Fort Campbell:** Fort Campbell Schools is a census district but is not in TDOE's file and is not funded by TISA, so it is left off.
 
-## Indicators (ACS 2020-2024 5-year)
+## Indicators
 
-The indicators are grouped into four domains for now. These will be renamed to MAM domains as more domains are added.
+Seventeen indicators come from the ACS 2020-2024 5-year estimates. Food access comes from USDA. The indicators are grouped into five domains for now. These will be renamed to MAM domains as more domains are added.
 
-| Domain | Indicator | Census source |
+| Domain | Indicator | Source |
 |---|---|---|
 | Income and work | Kids below 185% of poverty, ages 6 to 17 | B17024, built from counts |
 | Income and work | Kids below poverty, ages 5 to 17 | S1701_C03_004 |
 | Income and work | Unemployment rate, 16 and over | S2301_C04_001 |
 | Income and work | Median household income | B19013_001 |
 | Income and work | Gini index | B19083_001 |
-| Food, health and housing | SNAP households | S2201_C04_001 |
-| Food, health and housing | Kids uninsured, under 19 | S2701_C05_011 |
-| Food, health and housing | Crowded housing (more than 1 person per room) | B25014, built |
-| Food, health and housing | No complete plumbing | B25049, built |
-| Food, health and housing | Rent burden (35% or more of income) | B25070, built ("not computed" left out) |
-| Food, health and housing | Moved in the past year | B07003, built |
+| Food | Kids far from a SNAP store, ages 0 to 17 | USDA ERS SRAM, driving distance (see below) |
+| Food | SNAP households | S2201_C04_001 |
+| Health and housing | Kids uninsured, under 19 | S2701_C05_011 |
+| Health and housing | Crowded housing (more than 1 person per room) | B25014, built |
+| Health and housing | No complete plumbing | B25049, built |
+| Health and housing | Rent burden (35% or more of income) | B25070, built ("not computed" left out) |
+| Health and housing | Moved in the past year | B07003, built |
 | Getting around and getting online | No vehicle | S2504_C02_027 |
 | Getting around and getting online | No broadband | 100 − S2801_C02_014 |
 | Getting around and getting online | No computer | S2801_C02_011 |
@@ -95,7 +96,19 @@ The indicators are grouped into four domains for now. These will be renamed to M
 | Family and language | Limited English, 5 and over | S1601_C06_001 |
 | Family and language | Single-parent families | B11003, built |
 
-Each value has its margin of error (90%) in `data/indicators.csv`. Built percents use the Census Bureau's approximation formulas from *Understanding and Using American Community Survey Data*.
+Each ACS value has its margin of error (90%) in `data/indicators.csv`. Built percents use the Census Bureau's approximation formulas from *Understanding and Using American Community Survey Data*.
+
+### Food access
+
+The share of kids 0 to 17 who live far from a store that takes SNAP. Far means more than 1 mile by road in an urban census tract, or more than 10 miles by road in a rural one.
+
+- **Source:** USDA Economic Research Service, SNAP-Authorized Retailer Access Map (SRAM), July 2026 release. Stores are as of June 2025. People come from the 2020 Census, on 2020 tracts.
+- **Count:** `DD_SRAM_lakids1` in urban tracts and `DD_SRAM_lakids10` in rural tracts, divided by `TractKids`. USDA's own kids share columns divide by a tract's total population, so they are not used.
+- **Tracts to districts:** each tract's counts are split by the share of its people living in each district, from the team's 2024 tract-to-district crosswalk. This treats kids as spread like everyone else within a tract.
+- **Driving, not straight-line:** with straight-line distance, almost every rural tract is zero (685 of 697 in Tennessee, 438 of 490 in Mississippi).
+- **Kids, not everyone:** within a tract, the kids, all-residents and low-income shares are nearly identical (correlation 1.00), so only one is used.
+- **No margin of error:** USDA publishes none. The `foodkids_moe` column is empty.
+- **Zeros:** six districts are at 0: Nettleton and South Pike in Mississippi, and Fayetteville City, Bradford, Trenton and West Carroll in Tennessee.
 
 ## Data files
 
@@ -106,10 +119,13 @@ The files in `data/` are exact copies of products from the MAM census database. 
 | `data/districts.csv` | `30_dashboard_districts.do`, run dash_20261119T000312Z | `ea7759ca0e7df88ff6144a75b78101f5ac6504cd1da000c3875a6c53f9db0f8c` |
 | `data/indicators.csv` | `31_dashboard_indicators.do`, run dashind_20261119T001320Z | `8c870d39bc5a687368738076dbd63eee73402c34c9a0ec67f26b6c155395010b` |
 | `data/map.geojson` | `32_dashboard_map.do`, run dashmap_20261119T001806Z | `1101a3c55047a759cff6ddda4b04fe54520e19779fc23b4d85456ebddb90cc02` |
+| `data/food.csv` | `33_dashboard_food.do`, run dashfood_20261119T164127Z | `09e699a888f049d0f6bae32380924b46135f9444dec8a0bb8c8c63355933f6ef` |
 
 Sources behind them:
 
 - U.S. Census Bureau, American Community Survey 2020-2024 5-year estimates, Census Data API.
+- USDA Economic Research Service, [SNAP-Authorized Retailer Access Map data](https://www.ers.usda.gov/media/29395/2025-snap-authorized-retailer-access-map-sram-data.zip?v=84679), July 2026 release.
+- MAM team tract-to-district population shares, 2024 school district boundaries, built from 2020 Census blocks.
 - Tennessee Department of Education, district profile 2024-25 ([data downloads](https://www.tn.gov/education/districts/federal-programs-and-oversight/data/data-downloads.html)).
 - Mississippi Department of Education:
   - [Enrollment data download](https://newreports.mdek12.org/DataDownload)
@@ -121,12 +137,12 @@ Sources behind them:
   - [Mississippi Student Funding Formula, TPC](https://tpcref.org/mississippi-student-funding-formula/)
   - [George County School District FY26 budget hearing](https://irp.cdn-website.com/5877256e/files/uploaded/2025-2026+Public+Hearing+July+29-+2025.pdf)
 
-The decisions behind these choices are numbered D063 to D072 in the database's decision log.
+The decisions behind these choices are numbered D063 to D073 in the database's decision log.
 
 ## Files
 
 - `index.html`, `style.css`, `app.js`: the page
-- `data/`: the three data files above
+- `data/`: the four data files above
 
 To view it on your own computer, serve the folder (for example `python3 -m http.server`) and open the local address. Opening `index.html` directly from disk will not load the data.
 

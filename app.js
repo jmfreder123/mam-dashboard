@@ -10,7 +10,8 @@
     { code: "unemp", domain: "income", label: "Unemployment rate", unit: "%", dir: 1, desc: "People 16 and over in the labor force who are out of work." },
     { code: "mhhi", domain: "income", label: "Median household income", unit: "$", dir: -1, desc: "Half of households earn more and half earn less (2024 dollars).", note: "Lower income counts as more need." },
     { code: "gini", domain: "income", label: "Gini index", unit: "", dir: 1, desc: "How spread out incomes are inside the district, from 0 (equal) to 1.", note: "This measures inequality, not how many families are poor. Here, higher counts as more need." },
-    { code: "snap", domain: "needs", label: "SNAP households", unit: "%", dir: 1, desc: "Households that received SNAP (food stamps) in the past 12 months." },
+    { code: "foodkids", domain: "food", label: "Kids far from a SNAP store", unit: "%", dir: 1, desc: "Children 0 to 17 who live more than 1 mile (town) or 10 miles (rural) by road from a store that takes SNAP.", note: "From USDA store locations (2025) and the 2020 Census, not the ACS. No margin of error." },
+    { code: "snap", domain: "food", label: "SNAP households", unit: "%", dir: 1, desc: "Households that received SNAP (food stamps) in the past 12 months." },
     { code: "unins", domain: "needs", label: "Kids uninsured", unit: "%", dir: 1, desc: "Children under 19 with no health insurance." },
     { code: "crowd", domain: "needs", label: "Crowded housing", unit: "%", dir: 1, desc: "Households with more than one person per room." },
     { code: "plumb", domain: "needs", label: "No complete plumbing", unit: "%", dir: 1, desc: "Households lacking complete plumbing." },
@@ -24,10 +25,11 @@
     { code: "singlepar", domain: "family", label: "Single-parent families", unit: "%", dir: 1, desc: "Families with their own children under 18 that are headed by a single parent." }
   ];
   var BY = {}; IND.forEach(function (d) { BY[d.code] = d; });
-  // Groups for now (decision D072); to be renamed to MAM domains as they are added
+  // Groups for now (decisions D072, D073); to be renamed to MAM domains as they are added
   var DOMAINS = [
     { key: "income", label: "Income and work" },
-    { key: "needs", label: "Food, health and housing" },
+    { key: "food", label: "Food" },
+    { key: "needs", label: "Health and housing" },
     { key: "access", label: "Getting around and getting online" },
     { key: "family", label: "Family and language" }
   ];
@@ -106,9 +108,14 @@
     return rows.map(function (r) { var o = {}; h.forEach(function (k, j) { o[k] = r[j]; }); return o; });
   }
 
-  function build(dist, ind) {
+  function build(dist, ind, food) {
     var byId = {};
     ind.forEach(function (r) { byId[r.leaid] = r; });
+    // food access comes from its own file (decision D073); its moe column is empty
+    food.forEach(function (r) {
+      var x = byId[r.leaid];
+      if (x) { x.foodkids_est = r.foodkids_est; x.foodkids_moe = r.foodkids_moe; }
+    });
     dist.forEach(function (d) {
       var x = byId[d.leaid];
       var vals = {}, moe = {};
@@ -666,9 +673,10 @@
   Promise.all([
     fetch("data/districts.csv").then(function (r) { return r.text(); }),
     fetch("data/indicators.csv").then(function (r) { return r.text(); }),
-    fetch("data/map.geojson").then(function (r) { return r.json(); })
+    fetch("data/map.geojson").then(function (r) { return r.json(); }),
+    fetch("data/food.csv").then(function (r) { return r.text(); })
   ]).then(function (x) {
-    build(parseCSV(x[0]), parseCSV(x[1]));
+    build(parseCSV(x[0]), parseCSV(x[1]), parseCSV(x[3]));
     FEATURES.MS = x[2].features.filter(function (f) { return f.properties.leaid.slice(0, 2) === "28"; });
     FEATURES.TN = x[2].features.filter(function (f) { return f.properties.leaid.slice(0, 2) === "47"; });
     load();
