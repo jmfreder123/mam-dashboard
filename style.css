@@ -128,6 +128,33 @@ details.how ol { padding-left: 22px; }
 #map { width: 100%; height: auto; display: block; }
 #map path { stroke: var(--edge); stroke-width: .6; cursor: pointer; }
 #map path:hover, #map path.sel { stroke: var(--ink); stroke-width: 1.6; }
+#map path { vector-effect: non-scaling-stroke; }
+#map path:focus { outline: none; }
+#map path:focus-visible { stroke: var(--ink); stroke-width: 2.5; }
+#map path.nbr { stroke: var(--ink); stroke-width: 1.2; }
+#map path.focus { stroke: var(--accent); stroke-width: 3; }
+.distpanel { border-top: 1px solid var(--rule); margin-top: 12px; padding-top: 12px; }
+.dphead { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.dphead h3, .dphead h2 { margin: 0; }
+.facts { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 10px 0; font-size: 15px; }
+.facts dt { color: var(--soft); }
+.facts dd { margin: 0; font-variant-numeric: tabular-nums; }
+.distpanel h4, #districtPage h4 { font-size: 15px; margin: 14px 0 6px; }
+.nbrlist { list-style: none; padding: 0; margin: 6px 0 12px; display: flex; flex-wrap: wrap; gap: 6px; }
+.nbrlist button { font: inherit; font-size: 14px; font-weight: 400; padding: 4px 10px; border: 1px solid var(--rule); background: var(--panel); color: var(--ink); border-radius: 999px; }
+.nbrlist button:hover { border-color: var(--accent); color: var(--accent); }
+.nbrlist .sub { color: var(--soft); font-size: 13px; }
+.steps-col.dist-open > [data-step], .steps-col.dist-open > .nav { display: none !important; }
+.dtablewrap { overflow-x: auto; margin: 6px 0 14px; }
+.dtable { border-collapse: collapse; width: 100%; font-size: 14px; }
+.dtable th, .dtable td { border-bottom: 1px solid var(--rule); padding: 6px 8px; text-align: left; vertical-align: top; }
+.dtable th { background: var(--tone); font-weight: 600; vertical-align: bottom; }
+.dtable th.n { white-space: normal; }
+.dtable td:first-child { min-width: 150px; }
+#dpTitle:focus { outline: none; }
+.dtable td.n, .dtable th.n { text-align: right; font-variant-numeric: tabular-nums; }
+.dtable td.n { white-space: nowrap; }
+.dtable button.plain { font: inherit; padding: 0; border: 0; background: none; color: var(--good); text-decoration: underline; cursor: pointer; text-align: left; font-weight: 400; }
 .tip { position: absolute; pointer-events: none; background: var(--ink); color: #F7F5F0; padding: 8px 10px; font-size: 13px; line-height: 1.4; max-width: 260px; z-index: 5; }
 .tip b { display: block; font-size: 14px; }
 .legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 13px; color: var(--soft); margin: 8px 0; }

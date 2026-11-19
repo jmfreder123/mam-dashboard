@@ -21,6 +21,14 @@ The live panel updates as choices change. It has three views:
 
 The full district table in the money step also shows each district's rank now, its rank on the user's index, and the move.
 
+### One district
+
+Clicking a district on the map (or selecting it with the keyboard and pressing Enter) zooms the map to that district and the districts that border it. A short panel under the map shows its basic facts, how it does under the user's index, and its bordering districts, which can be clicked in turn. "Whole state" or the Escape key zooms back out.
+
+The panel opens a full district page in place of the steps. It shows all 18 indicators with the district's value, margin of error, the state median and its need rank on each (1 is the most need, and equal values share a rank), plus a table comparing it with its bordering districts. Each district page has its own link, for example `#district-2800750`.
+
+Bordering districts come from `data/neighbors.csv`. Two districts border each other if they are in the same state and share at least 0.00001 degrees (about 1 meter) of border in the full 2024 TIGER/Line boundaries. Districts that touch only at a corner do not count. The full boundaries are used because working this out from the simplified map shapes gave 16 wrong pairs out of 655.
+
 ### Index
 
 For each chosen indicator, every district in the state is scaled one of three ways. These are the same rules as the Arizona Student Poverty Index Lab:
@@ -136,6 +144,7 @@ The files in `data/` are exact copies of products from the MAM census database. 
 | `data/indicators.csv` | `31_dashboard_indicators.do`, run dashind_20261119T001320Z | `8c870d39bc5a687368738076dbd63eee73402c34c9a0ec67f26b6c155395010b` |
 | `data/map.geojson` | `32_dashboard_map.do`, run dashmap_20261119T001806Z | `1101a3c55047a759cff6ddda4b04fe54520e19779fc23b4d85456ebddb90cc02` |
 | `data/food.csv` | `33_dashboard_food.do`, run dashfood_20261119T164127Z | `09e699a888f049d0f6bae32380924b46135f9444dec8a0bb8c8c63355933f6ef` |
+| `data/neighbors.csv` | `34_dashboard_neighbors.do`, run dashnbr_20261119T180245Z | `06b550f90b61e61bfc12ec76f108aabd5f7dbe9e7cc511350d69a2a27ad19574` |
 
 Sources behind them:
 
@@ -153,13 +162,13 @@ Sources behind them:
   - [Mississippi Student Funding Formula, TPC](https://tpcref.org/mississippi-student-funding-formula/)
   - [George County School District FY26 budget hearing](https://irp.cdn-website.com/5877256e/files/uploaded/2025-2026+Public+Hearing+July+29-+2025.pdf)
 
-The decisions behind these choices are numbered D063 to D073 in the database's decision log.
+The decisions behind these choices are numbered D063 to D074 in the database's decision log.
 
 ## Files
 
 - `index.html`, `style.css`, `app.js`: the page
 - `dl.js`: the downloads (CSV, Excel, Stata and JSON writers)
-- `data/`: the four data files above
+- `data/`: the five data files above
 
 To view it on your own computer, serve the folder (for example `python3 -m http.server`) and open the local address. Opening `index.html` directly from disk will not load the data.
 

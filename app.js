@@ -474,6 +474,8 @@
     var H = Math.round((maxY - minY) * s + 2 * PAD);
     var svg = $("map");
     svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    svg.setAttribute("data-base", "0 0 " + W + " " + H);
+    vbNow = [0, 0, W, H];
     svg.innerHTML = "";
     var idx = {};
     rows().forEach(function (r, i) { idx[r.leaid] = i; });
@@ -495,6 +497,7 @@
       svg.appendChild(path);
       projected[f.properties.leaid] = path;
     });
+    if (focusId && projected[focusId]) { markMap(); setVB(zoomBox(focusId)); } else focusId = null;
   }
 
   var lastRes = null;
@@ -515,19 +518,19 @@
         return p > 150 ? moneyCols.g2 : p > 20 ? moneyCols.g1 : p < -150 ? moneyCols.l2 : p < -20 ? moneyCols.l1 : moneyCols.f;
       });
       key(moneyCols.l2, "loses over $150"); key(moneyCols.l1, "loses $20 to $150"); key(moneyCols.f, "within $20"); key(moneyCols.g1, "gains $20 to $150"); key(moneyCols.g2, "gains over $150");
-      note.textContent = "Per K-12 student. Hover or tap a district for details.";
+      note.textContent = "Per K-12 student. Hover over a district for a quick look, or click it to zoom in.";
     } else if (res.ok) {
       title.textContent = "Your index";
       cls = R.map(function (o) { return needCols[4 - Math.min(4, Math.floor((o.rank - 1) * 5 / n))]; });
       key(needCols[0], "lowest fifth"); key(needCols[1], ""); key(needCols[2], ""); key(needCols[3], ""); key(needCols[4], "highest fifth of need");
-      note.textContent = "Districts ranked by your index within " + LAW[state.st].name + ". Hover or tap a district for details.";
+      note.textContent = "Districts ranked by your index within " + LAW[state.st].name + ". Hover over a district for a quick look, or click it to zoom in.";
     } else {
       title.textContent = "Counted now";
       var pr = R.map(function (o) { return o.r.basePct; });
       var rk = rankDesc(pr);
       cls = rk.map(function (r) { return needCols[4 - Math.min(4, Math.floor((r - 1) * 5 / n))]; });
       key(needCols[0], "lowest fifth"); key(needCols[1], ""); key(needCols[2], ""); key(needCols[3], ""); key(needCols[4], "highest fifth");
-      note.textContent = "Share of students the state counts now: " + LAW[state.st].measure + ". Choose indicators to see your index.";
+      note.textContent = "Share of students the state counts now: " + LAW[state.st].measure + ". Choose indicators to see your index. Click a district to zoom in.";
     }
     rows().forEach(function (r, i) { var p = projected[r.leaid]; if (p) p.setAttribute("fill", cls[i]); });
     ["index", "money", "rank"].forEach(function (v) { $("mv-" + v).setAttribute("aria-checked", String(state.view === v)); });
@@ -572,6 +575,220 @@
     res.rows.slice().sort(function (a, b) { return a.rank - b.rank; }).slice(0, 10).forEach(function (o) {
       ol.appendChild(el("li", null, o.r.name));
     });
+  }
+
+  // ---------------------------------------------------------------------------
+  // One district: zoom on the map, a short panel under it, and a full page
+  // ---------------------------------------------------------------------------
+  var NBR = {};          // leaid -> neighboring leaids (34_dashboard_neighbors.do)
+  var focusId = null;    // district zoomed on the map
+  var pageId = null;     // district whose full page is open
+  var vbNow = null, vbAnim = null;
+
+  function rowOf(leaid) { if (!lastRes) return null; for (var i = 0; i < lastRes.rows.length; i++) if (lastRes.rows[i].r.leaid === leaid) return lastRes.rows[i]; return null; }
+  function stateOf(leaid) { return leaid.slice(0, 2) === "28" ? "MS" : "TN"; }
+  function baseVB() { var v = $("map").getAttribute("data-base").split(" ").map(Number); return v; }
+  function setVB(v) { vbNow = v; $("map").setAttribute("viewBox", v.map(function (x) { return x.toFixed(2); }).join(" ")); }
+  function animateVB(to) {
+    var from = vbNow || baseVB();
+    if (vbAnim) cancelAnimationFrame(vbAnim);
+    var calm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (calm) { setVB(to); return; }
+    var t0 = null, dur = 450;
+    function step(t) {
+      if (t0 === null) t0 = t;
+      var k = Math.min(1, (t - t0) / dur), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      setVB(from.map(function (a, i) { return a + (to[i] - a) * e; }));
+      if (k < 1) vbAnim = requestAnimationFrame(step); else vbAnim = null;
+    }
+    vbAnim = requestAnimationFrame(step);
+  }
+  // the box around a district and its neighbors, with the map's own shape
+  function zoomBox(leaid) {
+    var base = baseVB(), ids = [leaid].concat(NBR[leaid] || []);
+    var x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    ids.forEach(function (id) {
+      var p = projected[id]; if (!p) return;
+      var b = p.getBBox();
+      x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y); x1 = Math.max(x1, b.x + b.width); y1 = Math.max(y1, b.y + b.height);
+    });
+    var w = (x1 - x0) * 1.08, h = (y1 - y0) * 1.08, aspect = base[2] / base[3];
+    if (w / h > aspect) h = w / aspect; else w = h * aspect;
+    if (w > base[2]) { w = base[2]; h = base[3]; }
+    var cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    var x = Math.max(0, Math.min(base[2] - w, cx - w / 2)), y = Math.max(0, Math.min(base[3] - h, cy - h / 2));
+    return [x, y, w, h];
+  }
+  function markMap() {
+    document.querySelectorAll("#map path.focus, #map path.nbr").forEach(function (p) { p.classList.remove("focus"); p.classList.remove("nbr"); });
+    if (!focusId || !projected[focusId]) return;
+    var svg = $("map");
+    (NBR[focusId] || []).forEach(function (id) { var p = projected[id]; if (p) { p.classList.add("nbr"); svg.appendChild(p); } });
+    projected[focusId].classList.add("focus");
+    svg.appendChild(projected[focusId]);
+  }
+  function focusDistrict(leaid, instant) {
+    if (!projected[leaid]) return;
+    focusId = leaid;
+    hideTip();
+    markMap();
+    var box = zoomBox(leaid);
+    if (instant) setVB(box); else animateVB(box);
+    renderDistPanel();
+  }
+  function clearFocus() {
+    focusId = null;
+    markMap();
+    animateVB(baseVB());
+    renderDistPanel();
+  }
+
+  function addFact(dl, k, v) { dl.appendChild(el("dt", null, k)); dl.appendChild(el("dd", null, v)); }
+  function factsList(o) {
+    var r = o.r, law = LAW[state.st], dl = el("dl", { class: "facts" });
+    addFact(dl, "Type", r.type !== "unified" ? "City K-8 system" : "Unified district (K-12)");
+    addFact(dl, "K-12 students", fmtN(r.enroll));
+    addFact(dl, "Counted now", fmtN(o.curCount, 0) + " " + law.who + " students (" + fmtN(100 * o.curCount / r.enroll, 1) + "%)");
+    addFact(dl, "Poverty money now", money(o.curDollars));
+    return dl;
+  }
+  function yourList(o) {
+    var n = rows().length;
+    if (!lastRes.ok) return el("p", { class: "muted small" }, "Choose indicators and weights to see this district under your index.");
+    var dl = el("dl", { class: "facts" }), d = o.curRank - o.rank;
+    addFact(dl, "Need rank", o.rank + " of " + n + " under your index (" + o.curRank + " now, " + (d > 0 ? "up " + d : d < 0 ? "down " + (-d) : "no change") + ")");
+    addFact(dl, "Would count", fmtN(o.newCount, 0) + " students (" + fmtN(100 * o.newCount / o.r.enroll, 1) + "%)");
+    addFact(dl, "Poverty money", money(o.newDollars));
+    addFact(dl, "Change", moneySigned(o.change) + " (" + moneySigned(o.perStudent) + " per student)");
+    return dl;
+  }
+  function neighborButtons(leaid, onPick) {
+    var ul = el("ul", { class: "nbrlist" });
+    (NBR[leaid] || []).map(rowOf).filter(Boolean).sort(function (a, b) { return a.r.name < b.r.name ? -1 : 1; }).forEach(function (o) {
+      var li = el("li"), b = el("button", { type: "button" });
+      b.appendChild(document.createTextNode(o.r.name + " "));
+      b.appendChild(el("span", { class: "sub" }, lastRes.ok ? "rank " + o.rank : fmtN(o.r.basePct, 0) + "% counted"));
+      b.addEventListener("click", function () { onPick(o.r.leaid); });
+      li.appendChild(b); ul.appendChild(li);
+    });
+    return ul;
+  }
+
+  function renderDistPanel() {
+    var box = $("distPanel");
+    var o = focusId && rowOf(focusId);
+    if (!o) { box.hidden = true; box.innerHTML = ""; return; }
+    box.innerHTML = "";
+    var head = el("div", { class: "dphead" });
+    head.appendChild(el("h3", null, o.r.name));
+    var out = el("button", { type: "button", class: "ghost small" }, "Whole state");
+    out.addEventListener("click", clearFocus);
+    head.appendChild(out);
+    box.appendChild(head);
+    box.appendChild(factsList(o));
+    box.appendChild(el("h4", null, "Under your index"));
+    box.appendChild(yourList(o));
+    box.appendChild(el("h4", null, "Bordering districts (" + (NBR[o.r.leaid] || []).length + ")"));
+    box.appendChild(neighborButtons(o.r.leaid, function (id) { focusDistrict(id); }));
+    var open = el("button", { type: "button", class: "ghost small" }, "Open the full district page");
+    open.addEventListener("click", function () { openDistrictPage(o.r.leaid); });
+    box.appendChild(open);
+    box.hidden = false;
+  }
+
+  // need rank on one indicator: 1 = most need, equal values share a rank
+  function indRank(code, leaid) {
+    var d = BY[code].dir, R = rows(), x = null;
+    R.forEach(function (r) { if (r.leaid === leaid) x = d * r.vals[code]; });
+    var k = 1; R.forEach(function (r) { if (d * r.vals[code] > x) k++; });
+    return k;
+  }
+  function median(a) { var b = a.slice().sort(function (x, y) { return x - y; }), m = b.length >> 1; return b.length % 2 ? b[m] : (b[m - 1] + b[m]) / 2; }
+
+  function renderDistrictPage() {
+    var page = $("districtPage"), col = page.parentNode;
+    var o = pageId && rowOf(pageId);
+    if (!o) { page.hidden = true; page.innerHTML = ""; col.classList.remove("dist-open"); return; }
+    page.innerHTML = "";
+    var law = LAW[state.st], r = o.r, n = rows().length;
+    var back = el("button", { type: "button", class: "ghost small" }, "Back to the steps");
+    back.addEventListener("click", function () { closeDistrictPage(); });
+    page.appendChild(back);
+    var h = el("h2", null, r.name); h.style.marginTop = "14px"; h.setAttribute("tabindex", "-1"); h.id = "dpTitle";
+    page.appendChild(h);
+    var raw = null; RAW.dist.forEach(function (d) { if (d.leaid === r.leaid) raw = d; });
+    page.appendChild(el("p", { class: "muted small" }, law.name + " · federal ID " + r.leaid + (raw ? " · state district number " + raw.st_no : "")));
+
+    page.appendChild(el("h3", null, "Basic facts"));
+    page.appendChild(factsList(o));
+    page.appendChild(el("h3", null, "Under your index"));
+    page.appendChild(yourList(o));
+
+    page.appendChild(el("h3", null, "Indicators"));
+    page.appendChild(el("p", { class: "muted small" }, "Rank 1 is the most need among " + n + " " + law.name + " districts. The margin of error is the census range at 90 percent confidence: the true value is likely within that many points of the estimate."));
+    DOMAINS.forEach(function (g) {
+      var codes = IND.filter(function (d) { return d.domain === g.key; });
+      page.appendChild(el("h4", null, g.label));
+      var wrap = el("div", { class: "dtablewrap" }), t = el("table", { class: "dtable" });
+      var hr = el("tr");
+      [["Indicator", ""], ["This district", "n"], ["Margin of error", "n"], ["State median", "n"], ["Need rank", "n"]].forEach(function (c) { hr.appendChild(el("th", c[1] ? { class: c[1] } : null, c[0])); });
+      t.appendChild(hr);
+      codes.forEach(function (d) {
+        var tr = el("tr"), v = r.vals[d.code], m = r.moe[d.code];
+        var name = el("td", null, d.label); if (d.note) name.title = d.note; tr.appendChild(name);
+        tr.appendChild(el("td", { class: "n" }, fmtVal(d.code, v)));
+        tr.appendChild(el("td", { class: "n" }, isFinite(m) ? "± " + fmtVal(d.code, m) : "none published"));
+        tr.appendChild(el("td", { class: "n" }, fmtVal(d.code, median(rows().map(function (x) { return x.vals[d.code]; })))));
+        tr.appendChild(el("td", { class: "n" }, indRank(d.code, r.leaid) + " of " + n));
+        t.appendChild(tr);
+      });
+      wrap.appendChild(t); page.appendChild(wrap);
+    });
+
+    var nb = (NBR[r.leaid] || []).map(rowOf).filter(Boolean).sort(function (a, b) { return a.r.name < b.r.name ? -1 : 1; });
+    page.appendChild(el("h3", null, "Bordering districts (" + nb.length + ")"));
+    var wrap = el("div", { class: "dtablewrap" }), t = el("table", { class: "dtable" }), hr = el("tr");
+    var heads = [["District", ""], ["Students", "n"], ["Counted now", "n"], ["Rank now", "n"]];
+    if (lastRes.ok) heads = heads.concat([["Your rank", "n"], ["Change / student", "n"]]);
+    heads.forEach(function (c) { hr.appendChild(el("th", c[1] ? { class: c[1] } : null, c[0])); });
+    t.appendChild(hr);
+    [o].concat(nb).forEach(function (x, i) {
+      var tr = el("tr"), td = el("td");
+      if (i === 0) td.appendChild(el("strong", null, x.r.name));
+      else { var b = el("button", { type: "button", class: "plain" }, x.r.name); b.addEventListener("click", function () { openDistrictPage(x.r.leaid); }); td.appendChild(b); }
+      tr.appendChild(td);
+      tr.appendChild(el("td", { class: "n" }, fmtN(x.r.enroll)));
+      tr.appendChild(el("td", { class: "n" }, fmtN(x.r.basePct, 1) + "%"));
+      tr.appendChild(el("td", { class: "n" }, String(x.curRank)));
+      if (lastRes.ok) { tr.appendChild(el("td", { class: "n" }, String(x.rank))); tr.appendChild(el("td", { class: "n" }, moneySigned(x.perStudent))); }
+      t.appendChild(tr);
+    });
+    wrap.appendChild(t); page.appendChild(wrap);
+    page.hidden = false;
+    col.classList.add("dist-open");
+  }
+
+  function openDistrictPage(leaid) {
+    if (location.hash !== "#district-" + leaid) { location.hash = "district-" + leaid; return; } // hashchange does the rest
+    showDistrictFromHash();
+  }
+  function showDistrictFromHash() {
+    var m = /^#district-(\d{7})$/.exec(location.hash);
+    if (!m || !DATA[stateOf(m[1])].some(function (r) { return r.leaid === m[1]; })) { if (pageId) { pageId = null; renderDistrictPage(); } return; }
+    var id = m[1], st = stateOf(id);
+    if (state.st !== st) { state.st = st; focusId = null; buildMap(); update(); }
+    pageId = id;
+    focusDistrict(id, false);
+    renderDistrictPage();
+    window.scrollTo(0, 0);
+    var h = $("dpTitle"); if (h) h.focus({ preventScroll: true });
+  }
+  function closeDistrictPage() {
+    if (!pageId) return;
+    pageId = null;
+    if (/^#district-/.test(location.hash)) history.pushState(null, "", location.pathname + location.search);
+    renderDistrictPage();
+    window.scrollTo(0, 0);
   }
 
   // ---------------------------------------------------------------------------
@@ -626,6 +843,8 @@
     var res = results();
     colorMap(res);
     renderTop(res);
+    renderDistPanel();
+    if (pageId) renderDistrictPage();
     $("mapView").hidden = state.view === "rank";
     $("rankView").hidden = state.view !== "rank";
     if (state.view === "rank") { hideTip(); renderRanks(res); }
@@ -654,6 +873,7 @@
     ["MS", "TN"].forEach(function (s) {
       $("st-" + s).addEventListener("click", function () {
         if (state.st === s) return;
+        closeDistrictPage(); focusId = null;
         state.st = s; hideTip(); buildMap(); update();
       });
     });
@@ -664,8 +884,8 @@
       $(id).addEventListener("mouseover", function (e) { var x = e.target.closest("li"); highlight(x && x.getAttribute("data-leaid")); });
       $(id).addEventListener("mouseleave", function () { highlight(null); });
     });
-    $("nextBtn").addEventListener("click", function () { if (state.step < STEPS.length - 1) { state.step++; update(); window.scrollTo(0, 0); } });
-    $("backBtn").addEventListener("click", function () { if (state.step > 0) { state.step--; update(); window.scrollTo(0, 0); } });
+    $("nextBtn").addEventListener("click", function () { closeDistrictPage(); if (state.step < STEPS.length - 1) { state.step++; update(); window.scrollTo(0, 0); } });
+    $("backBtn").addEventListener("click", function () { closeDistrictPage(); if (state.step > 0) { state.step--; update(); window.scrollTo(0, 0); } });
     $("evenBtn").addEventListener("click", function () { state.weights = evenWeights(); state.weightsTouched = true; renderWeights(); renderStepper(); updateLive(); save(); });
     document.querySelectorAll("input[name=scale]").forEach(function (x) {
       x.addEventListener("change", function () { state.scale = x.value; renderScale(); updateLive(); save(); });
@@ -674,7 +894,10 @@
       var b = e.target.closest("button[data-go]");
       if (!b || b.disabled) return;
       var i = Number(b.getAttribute("data-go"));
-      if (i !== state.step && i <= farthestStep()) { state.step = i; update(); }
+      if (i > farthestStep()) return;
+      var wasOpen = !!pageId;
+      closeDistrictPage();
+      if (i !== state.step || wasOpen) { state.step = i; update(); }
     });
     var resetArmed = false;
     $("resetBtn").addEventListener("click", function () {
@@ -683,12 +906,30 @@
       var st = state.st;
       state = { st: st, step: 0, picked: [], weights: {}, weightsTouched: false, scale: "rank", view: "index" };
       sortKey = "rank"; sortDir = 1;
+      closeDistrictPage(); focusId = null; markMap(); setVB(baseVB());
       update();
     });
     var svg = $("map");
     svg.addEventListener("mousemove", function (e) { if (e.target.tagName === "path") showTip(e.target, e); });
     svg.addEventListener("mouseleave", hideTip);
-    svg.addEventListener("click", function (e) { if (e.target.tagName === "path") showTip(e.target, e); });
+    svg.addEventListener("click", function (e) {
+      if (e.target.tagName !== "path") return;
+      var o = lastRes && lastRes.rows[Number(e.target.getAttribute("data-i"))];
+      if (o) focusDistrict(o.r.leaid);
+    });
+    svg.addEventListener("keydown", function (e) {
+      if ((e.key === "Enter" || e.key === " ") && e.target.tagName === "path") {
+        e.preventDefault();
+        var o = lastRes && lastRes.rows[Number(e.target.getAttribute("data-i"))];
+        if (o) focusDistrict(o.r.leaid);
+      }
+    });
+    window.addEventListener("hashchange", showDistrictFromHash);
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Escape" || !focusId || pageId) return;
+      if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+      clearFocus();
+    });
     svg.addEventListener("focusin", function (e) { if (e.target.tagName === "path") showTip(e.target, null); });
     svg.addEventListener("focusout", hideTip);
   }
@@ -697,8 +938,10 @@
     fetch("data/districts.csv").then(function (r) { return r.text(); }),
     fetch("data/indicators.csv").then(function (r) { return r.text(); }),
     fetch("data/map.geojson").then(function (r) { return r.json(); }),
-    fetch("data/food.csv").then(function (r) { return r.text(); })
+    fetch("data/food.csv").then(function (r) { return r.text(); }),
+    fetch("data/neighbors.csv").then(function (r) { return r.text(); })
   ]).then(function (x) {
+    parseCSV(x[4]).forEach(function (r) { (NBR[r.leaid] = NBR[r.leaid] || []).push(r.neighbor_leaid); });
     RAW.dist = parseCSV(x[0]); RAW.ind = parseCSV(x[1]); RAW.food = parseCSV(x[3]); RAW.map = x[2];
     build(RAW.dist, RAW.ind, RAW.food);
     FEATURES.MS = x[2].features.filter(function (f) { return f.properties.leaid.slice(0, 2) === "28"; });
@@ -708,6 +951,7 @@
     buildMap();
     update();
     document.dispatchEvent(new CustomEvent("mam:ready"));
+    if (/^#district-/.test(location.hash)) showDistrictFromHash();
   }).catch(function (e) {
     document.querySelector("main").insertAdjacentHTML("afterbegin", "<div class=\"warn\"><p>The data files could not be loaded. Open this page from its web address, not from a file on your computer.</p></div>");
     console.error(e);

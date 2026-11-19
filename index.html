@@ -31,6 +31,9 @@
 <main class="wrap layout">
   <section class="steps-col" aria-label="Build your index">
 
+    <!-- District page (opened from the map) -->
+    <div class="panel" id="districtPage" hidden></div>
+
     <!-- Step 0 -->
     <div class="panel" data-step="0">
       <h2>How it works</h2>
@@ -125,6 +128,7 @@
         <div class="mapbox"><svg id="map" role="img" aria-labelledby="mapTitle"></svg><div class="tip" id="tip" hidden></div></div>
         <div class="legend" id="legend"></div>
         <p class="muted small" id="mapNote"></p>
+        <div class="distpanel" id="distPanel" hidden></div>
         <h3>Top ten by your index</h3>
         <ol class="toplist" id="topList"></ol>
       </div>
