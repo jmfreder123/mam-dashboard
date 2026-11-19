@@ -181,6 +181,14 @@ ol.ranklist li.empty { display: block; color: var(--soft); }
 .dldesc { margin: 10px 0 4px; }
 #dlDone { margin: 0; }
 #dlPrevTitle { margin: 22px 0 4px; }
+.dlcols { margin: 6px 0 14px; border: 1px solid var(--rule); padding: 0 14px; background: #FFF; }
+.dlcols summary { font-weight: 700; padding: 10px 0; }
+.dlcolbar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-bottom: 6px; }
+.dlcolgroup { border: 0; padding: 0; margin: 10px 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 4px 16px; }
+.dlcolgroup legend { font-weight: 700; font-size: 14px; color: var(--soft); padding: 0; margin-bottom: 4px; }
+.dlcheck { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; line-height: 1.35; cursor: pointer; }
+.dlcheck input { margin-top: 2px; accent-color: var(--accent); flex: none; }
+.dlcheck:has(input:disabled) { color: var(--soft); cursor: default; }
 .dlpreview { overflow: auto; max-height: 460px; border: 1px solid var(--rule); background: #FFF; }
 .dlpreview table { border-collapse: collapse; font-size: 13px; min-width: 100%; }
 .dlpreview th, .dlpreview td { border-bottom: 1px solid var(--tone); border-right: 1px solid var(--tone); padding: 5px 8px; text-align: left; white-space: nowrap; }

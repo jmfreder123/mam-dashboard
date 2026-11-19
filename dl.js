@@ -347,15 +347,122 @@
   }
 
   // the table people are about to download, shown on the page
+  // ---------------------------------------------------------------------------
+  // Choosing columns. Items group one or more columns; state and leaid are
+  // always kept so rows can be matched to other files.
+  // ---------------------------------------------------------------------------
+  var SEL = { indicators: {}, funding: {}, results: {} };   // item id -> false when left out
+  var MOE = true;                                             // indicators: keep margins of error
+  var colsSig = "";
+
+  function groupsFor(what, ds) {
+    var lab = {}; ds.cols.forEach(function (c) { lab[c.name] = c.label; });
+    function one(n) { return { id: n, label: lab[n], cols: [n], locked: n === "state" || n === "leaid" }; }
+    function has(n) { return n in lab; }
+    if (what === "indicators") {
+      var g = [{ label: "District", items: ["state", "leaid", "st_no", "name_census", "district_type"].filter(has).map(one) }];
+      M.DOMAINS.forEach(function (d) {
+        g.push({ label: d.label, items: M.IND.filter(function (i) { return i.domain === d.key; }).map(function (i) {
+          return { id: i.code, label: i.label, cols: [i.code + "_est", i.code + "_moe"].filter(has) };
+        }) });
+      });
+      g.push({ label: "Other", items: [{ id: "kids617", label: "Children ages 6 to 17 (count)", cols: ["kids617_est", "kids617_moe"].filter(has) }] });
+      return g;
+    }
+    if (what === "funding") {
+      return [
+        { label: "District", items: ["state", "leaid", "st_no", "st_leaid", "name_census", "name_state", "name_ccd", "district_type"].map(one) },
+        { label: "Students counted now", items: ["enroll_k12", "base_pct", "base_count", "base_measure", "enroll_source", "ms_starred_cells", "cep_id", "cep_name"].map(one) },
+        { label: "Funding rules in law", items: ["formula", "formula_year", "base_amount", "poverty_weight", "concentration_weight", "concentration_line"].map(one) }
+      ];
+    }
+    var codes = M.state().picked;
+    return [
+      { label: "District", items: ["state", "leaid", "district", "enroll_k12", "base_pct"].map(one) },
+      { label: "Your indicators (value, scaled value and weight)", items: codes.map(function (c) { return { id: c, label: M.BY[c].label, cols: ["val_" + c, "sc_" + c, "w_" + c] }; }) },
+      { label: "Your index and ranks", items: ["scaling", "index", "rank_now", "rank_yours", "rank_move"].map(one) },
+      { label: "Money", items: ["count_now", "count_yours", "dollars_now", "dollars_yours", "change", "change_per_student"].map(one) }
+    ];
+  }
+
+  function applyCols(what, ds) {
+    var keep = {};
+    groupsFor(what, ds).forEach(function (g) { g.items.forEach(function (it) {
+      if (it.locked || SEL[what][it.id] !== false) it.cols.forEach(function (n) { keep[n] = true; });
+    }); });
+    if (what === "indicators" && !MOE) Object.keys(keep).forEach(function (n) { if (/_moe$/.test(n)) delete keep[n]; });
+    var out = {}; Object.keys(ds).forEach(function (k) { out[k] = ds[k]; });
+    out.cols = ds.cols.filter(function (c) { return keep[c.name]; });
+    out.allCols = ds.cols.length;
+    return out;
+  }
+
+  function buildData(what, sel) {
+    var ds = what === "indicators" ? indicatorsData(sel) : what === "funding" ? fundingData(sel) : resultsData(sel);
+    return applyCols(what, ds);
+  }
+
+  function renderCols(what, full, shown) {
+    var box = $("dlCols"), body = $("dlColsBody");
+    if (!full) { box.hidden = true; return; }
+    box.hidden = false;
+    $("dlColsSum").textContent = "Choose columns (" + shown.cols.length + " of " + full.cols.length + " chosen)";
+    var groups = groupsFor(what, full);
+    var sig = what + "|" + groups.map(function (g) { return g.items.map(function (i) { return i.id; }).join(","); }).join("|");
+    if (sig !== colsSig) {
+      colsSig = sig;
+      body.innerHTML = "";
+      var bar = document.createElement("div"); bar.className = "dlcolbar";
+      [["All", true], ["None", false]].forEach(function (x) {
+        var b = document.createElement("button"); b.type = "button"; b.className = "ghost small"; b.textContent = x[0];
+        b.addEventListener("click", function () {
+          groupsFor(what, full).forEach(function (g) { g.items.forEach(function (it) { if (!it.locked) SEL[what][it.id] = x[1]; }); });
+          if (what === "indicators") MOE = x[1];
+          render();
+        });
+        bar.appendChild(b);
+      });
+      if (what === "indicators") {
+        var ml = document.createElement("label"); ml.className = "dlcheck";
+        var mc = document.createElement("input"); mc.type = "checkbox"; mc.id = "dlMoe";
+        mc.addEventListener("change", function () { MOE = mc.checked; render(); });
+        ml.appendChild(mc); ml.appendChild(document.createTextNode(" Include margins of error"));
+        bar.appendChild(ml);
+      }
+      body.appendChild(bar);
+      groups.forEach(function (g) {
+        if (!g.items.length) return;
+        var fs = document.createElement("fieldset"); fs.className = "dlcolgroup";
+        var lg = document.createElement("legend"); lg.textContent = g.label; fs.appendChild(lg);
+        g.items.forEach(function (it) {
+          var l = document.createElement("label"); l.className = "dlcheck";
+          var c = document.createElement("input"); c.type = "checkbox"; c.setAttribute("data-item", it.id);
+          if (it.locked) { c.disabled = true; l.title = "Always included, so rows can be matched to other files"; }
+          c.addEventListener("change", function () { SEL[what][it.id] = c.checked; render(); });
+          l.appendChild(c); l.appendChild(document.createTextNode(" " + it.label + (it.locked ? " (always included)" : "")));
+          fs.appendChild(l);
+        });
+        body.appendChild(fs);
+      });
+    }
+    body.querySelectorAll("input[data-item]").forEach(function (c) {
+      var id = c.getAttribute("data-item");
+      c.checked = c.disabled || SEL[what][id] !== false;
+    });
+    var m = $("dlMoe"); if (m) m.checked = MOE;
+  }
+
   function renderPreview(what, sel, ok) {
     var box = $("dlPreview"), note = $("dlPrevNote");
     box.innerHTML = "";
     if (what === "map") {
       note.textContent = "Map boundaries are shapes, not a table. The file has one shape for each district, with its federal ID and name.";
-      box.hidden = true; return;
+      box.hidden = true; renderCols(what, null); return;
     }
-    if (!ok) { note.textContent = "Your results will show here once your indicators and weights are set."; box.hidden = true; return; }
-    var ds = what === "indicators" ? indicatorsData(sel) : what === "funding" ? fundingData(sel) : resultsData(sel);
+    if (!ok) { note.textContent = "Your results will show here once your indicators and weights are set."; box.hidden = true; renderCols(what, null); return; }
+    var full = what === "indicators" ? indicatorsData(sel) : what === "funding" ? fundingData(sel) : resultsData(sel);
+    var ds = applyCols(what, full);
+    renderCols(what, full, ds);
     note.textContent = ds.rows.length + " districts and " + ds.cols.length + " columns. Hover over a column name to see what it means. Scroll sideways to see every column.";
     var t = document.createElement("table"), thead = document.createElement("thead"), hr = document.createElement("tr");
     ds.cols.forEach(function (c) {
@@ -375,7 +482,8 @@
         if (c.type === "num") {
           td.className = "n";
           var x = numOf(v);
-          td.textContent = x == null ? "" : typeof v === "string" ? v : String(Math.round(x * 1e6) / 1e6);
+          // shown with a leading zero (.5 as 0.5); the files keep the text exactly as in the data
+          td.textContent = x == null ? "" : typeof v === "string" ? v.replace(/^(-?)\./, "$10.") : String(Math.round(x * 1e6) / 1e6);
         } else td.textContent = v == null ? "" : String(v);
         tr.appendChild(td);
       });
@@ -391,7 +499,7 @@
     var stPart = sel === "both" ? "MS_TN" : sel, blob, name;
     if (what === "map") { blob = mapGeoJSON(sel); name = "mam_district_boundaries_" + stPart + ".geojson"; }
     else {
-      var ds = what === "indicators" ? indicatorsData(sel) : what === "funding" ? fundingData(sel) : resultsData(sel);
+      var ds = buildData(what, sel);
       blob = fmt === "csv" ? toCSV(ds) : fmt === "xlsx" ? toXLSX(ds) : fmt === "dta" ? toDTA(ds) : toJSON(ds);
       name = "mam_" + ds.key + "_" + stPart + (what === "results" ? "_" + today() : "") + "." + fmt;
     }
@@ -417,5 +525,5 @@
     });
   });
 
-  window.__mamDownload = { indicatorsData: indicatorsData, fundingData: fundingData, resultsData: resultsData, toCSV: toCSV, toJSON: toJSON, toXLSX: toXLSX, toDTA: toDTA };
+  window.__mamDownload = { buildData: buildData, indicatorsData: indicatorsData, fundingData: fundingData, resultsData: resultsData, toCSV: toCSV, toJSON: toJSON, toXLSX: toXLSX, toDTA: toDTA };
 })();

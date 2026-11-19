@@ -77,6 +77,8 @@ The Download the data section at the bottom of the page (also reached from the D
 - **State:** Mississippi, Tennessee or both.
 - **File type:** CSV, Excel (.xlsx), Stata (.dta, format 118 for Stata 14 or later) or JSON. Map boundaries come as GeoJSON only.
 
+A **Choose columns** box lets them keep only some columns, grouped like the indicators step, with an option to leave out margins of error. `state` and `leaid` always stay in, so rows can be matched to other files. A preview table under the button shows exactly what will be downloaded and updates as the choices change.
+
 Every file is built in the browser from the files in `data/`. Nothing is sent anywhere.
 
 - **Indicators:** the columns of `data/indicators.csv` plus `foodkids_est` and `foodkids_moe` from `data/food.csv`. The CSV keeps the numbers exactly as they are written in those files.

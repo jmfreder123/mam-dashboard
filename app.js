@@ -960,6 +960,6 @@
 
   window.__mam = {
     results: results, resultsFor: resultsFor, reshare: reshare, ready: ready, weightsNow: weightsNow,
-    state: function () { return state; }, data: DATA, raw: RAW, LAW: LAW, IND: IND, BY: BY
+    state: function () { return state; }, data: DATA, raw: RAW, LAW: LAW, IND: IND, BY: BY, DOMAINS: DOMAINS
   };
 })();
