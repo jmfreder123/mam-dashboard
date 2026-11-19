@@ -476,7 +476,7 @@
     var svg = $("map");
     svg.setAttribute("viewBox", "0 0 " + W + " " + H);
     svg.setAttribute("data-base", "0 0 " + W + " " + H);
-    vbNow = [0, 0, W, H];
+    setVB([0, 0, W, H]);
     svg.innerHTML = "";
     var idx = {};
     rows().forEach(function (r, i) { idx[r.leaid] = i; });
@@ -589,7 +589,25 @@
   function rowOf(leaid) { if (!lastRes) return null; for (var i = 0; i < lastRes.rows.length; i++) if (lastRes.rows[i].r.leaid === leaid) return lastRes.rows[i]; return null; }
   function stateOf(leaid) { return leaid.slice(0, 2) === "28" ? "MS" : "TN"; }
   function baseVB() { var v = $("map").getAttribute("data-base").split(" ").map(Number); return v; }
-  function setVB(v) { vbNow = v; $("map").setAttribute("viewBox", v.map(function (x) { return x.toFixed(2); }).join(" ")); }
+  function clampVB(v) {
+    var base = baseVB(), w = Math.min(base[2], Math.max(base[2] / 16, v[2])), h = w * base[3] / base[2];
+    var x = Math.max(0, Math.min(base[2] - w, v[0])), y = Math.max(0, Math.min(base[3] - h, v[1]));
+    return [x, y, w, h];
+  }
+  function setVB(v) {
+    vbNow = v;
+    var svg = $("map"), base = baseVB(), zoomed = v[2] < base[2] - 0.5;
+    svg.setAttribute("viewBox", v.map(function (x) { return x.toFixed(2); }).join(" "));
+    svg.classList.toggle("zoomed", zoomed);
+    $("zoomHint").hidden = !zoomed;
+    $("zoomOut").disabled = !zoomed;
+    $("zoomIn").disabled = v[2] <= base[2] / 16 + 0.01;
+  }
+  // + and - buttons: zoom around the middle of what is shown now
+  function zoomBy(f) {
+    var v = vbNow || baseVB(), w = v[2] / f, h = v[3] / f;
+    animateVB(clampVB([v[0] + (v[2] - w) / 2, v[1] + (v[3] - h) / 2, w, h]));
+  }
   function animateVB(to) {
     var from = vbNow || baseVB();
     if (vbAnim) cancelAnimationFrame(vbAnim);
@@ -911,7 +929,33 @@
       update();
     });
     var svg = $("map");
-    svg.addEventListener("mousemove", function (e) { if (e.target.tagName === "path") showTip(e.target, e); });
+    // drag to move around when zoomed in
+    var drag = null, dragged = false;
+    svg.addEventListener("pointerdown", function (e) {
+      if (!svg.classList.contains("zoomed") || e.button !== 0) return;
+      drag = { x: e.clientX, y: e.clientY, v: (vbNow || baseVB()).slice(), id: e.pointerId };
+      dragged = false;
+    });
+    svg.addEventListener("pointermove", function (e) {
+      if (!drag || e.pointerId !== drag.id) return;
+      var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if (!dragged && Math.abs(dx) + Math.abs(dy) < 5) return;
+      if (!dragged) { dragged = true; svg.setPointerCapture(e.pointerId); svg.classList.add("dragging"); hideTip(); if (vbAnim) { cancelAnimationFrame(vbAnim); vbAnim = null; } }
+      var k = drag.v[2] / svg.clientWidth;
+      setVB(clampVB([drag.v[0] - dx * k, drag.v[1] - dy * k, drag.v[2], drag.v[3]]));
+    });
+    function endDrag(e) {
+      if (!drag || (e && e.pointerId !== drag.id)) return;
+      drag = null; svg.classList.remove("dragging");
+      setTimeout(function () { dragged = false; }, 0);
+    }
+    svg.addEventListener("pointerup", endDrag);
+    svg.addEventListener("pointercancel", endDrag);
+    svg.addEventListener("click", function (e) { if (dragged) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
+    $("zoomIn").addEventListener("click", function () { zoomBy(1.6); });
+    $("zoomOut").addEventListener("click", function () { zoomBy(1 / 1.6); });
+    $("zoomAll").addEventListener("click", function () { if (focusId) clearFocus(); else animateVB(baseVB()); });
+    svg.addEventListener("mousemove", function (e) { if (drag && dragged) return; if (e.target.tagName === "path") showTip(e.target, e); });
     svg.addEventListener("mouseleave", hideTip);
     svg.addEventListener("click", function (e) {
       if (e.target.tagName !== "path") return;

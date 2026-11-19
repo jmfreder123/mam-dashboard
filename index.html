@@ -126,6 +126,14 @@
       </div>
       <div id="mapView">
         <div class="mapbox"><svg id="map" role="img" aria-labelledby="mapTitle"></svg><div class="tip" id="tip" hidden></div></div>
+        <div class="zoomrow">
+          <div class="zoomctl" role="group" aria-label="Map zoom">
+            <button type="button" id="zoomIn" aria-label="Zoom in" title="Zoom in">+</button>
+            <button type="button" id="zoomOut" aria-label="Zoom out" title="Zoom out">&minus;</button>
+            <button type="button" id="zoomAll" class="wide" title="Show the whole state">Whole state</button>
+          </div>
+          <p class="muted small zoomhint" id="zoomHint" hidden>Drag the map to move around.</p>
+        </div>
         <div class="legend" id="legend"></div>
         <p class="muted small" id="mapNote"></p>
         <div class="distpanel" id="distPanel" hidden></div>
