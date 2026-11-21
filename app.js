@@ -396,8 +396,63 @@
     box.appendChild(wrap);
   }
 
+  // Step 4: the state's current top ten next to the user's, as in the Arizona lab
+  function renderCompare(res) {
+    var now = $("cmpNow"), yours = $("cmpYours"), add = $("cmpAdded"), drop = $("cmpDropped");
+    now.innerHTML = ""; yours.innerHTML = ""; add.innerHTML = ""; drop.innerHTML = "";
+    var law = LAW[state.st], R = res.rows;
+    function nm(o) { return o.r.name + (o.r.type !== "unified" ? " (city K-8)" : ""); }
+    var topNow = R.slice().sort(function (a, b) { return a.curRank - b.curRank; }).slice(0, 10);
+    topNow.forEach(function (o) { now.appendChild(el("li", { "data-leaid": o.r.leaid }, nm(o))); });
+    if (!res.ok) {
+      $("cmpNote").textContent = "Left: the ten " + law.name + " districts with the highest share of students in the state's current poverty count (" + law.measure + "). Choose indicators and weights to see your top ten beside it.";
+      yours.appendChild(el("li", { class: "empty" }, "Choose indicators first."));
+      return;
+    }
+    var topYours = R.slice().sort(function (a, b) { return a.rank - b.rank; }).slice(0, 10);
+    var idsNow = topNow.map(function (o) { return o.r.leaid; }), idsYours = topYours.map(function (o) { return o.r.leaid; });
+    Array.prototype.forEach.call(now.children, function (li, i) {
+      if (idsYours.indexOf(idsNow[i]) < 0) { li.className = "notin"; li.title = "Not in your top ten"; }
+    });
+    topYours.forEach(function (o) {
+      var li = el("li", { "data-leaid": o.r.leaid }, nm(o));
+      if (idsNow.indexOf(o.r.leaid) < 0) { li.className = "notin"; li.title = "Not in the state's current top ten"; }
+      yours.appendChild(li);
+    });
+    var both = topYours.filter(function (o) { return idsNow.indexOf(o.r.leaid) >= 0; }).length;
+    $("cmpNote").textContent = both + " of 10 districts are in both top tens. Names in bold are not in the other list. The state's current count is " + law.measure + ".";
+    function item(o) { return el("li", null, nm(o) + ": rank now " + o.curRank + ", your rank " + o.rank); }
+    var added = topYours.filter(function (o) { return idsNow.indexOf(o.r.leaid) < 0; });
+    var dropped = topNow.filter(function (o) { return idsYours.indexOf(o.r.leaid) < 0; });
+    if (added.length) added.forEach(function (o) { add.appendChild(item(o)); }); else add.appendChild(el("li", null, "None. Your top ten has the same districts."));
+    if (dropped.length) dropped.forEach(function (o) { drop.appendChild(item(o)); }); else drop.appendChild(el("li", null, "None."));
+  }
+
+  // Step 4: the All districts table can open across the full page
+  var tableWide = false;
+  function setTableWide(on) {
+    var wrap = $("fullWrap"), sec = $("wideTable"), btn = $("expandBtn");
+    if (on === tableWide) return;
+    tableWide = on;
+    if (on) {
+      var panel = sec.querySelector(".panel"); panel.innerHTML = "";
+      panel.appendChild(el("h2", null, "All districts"));
+      panel.appendChild(wrap);
+      wrap.classList.add("wide");
+      sec.hidden = false;
+      btn.textContent = "Collapse table";
+      sec.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      $("fullHome").appendChild(wrap);
+      wrap.classList.remove("wide");
+      sec.hidden = true;
+      btn.textContent = "Expand table";
+    }
+  }
+
   var sortKey = "rank", sortDir = 1;
   function renderMoney(res) {
+    renderCompare(res);
     var law = LAW[state.st];
     var perStudent = law.w * law.base;
     $("fundIntro").textContent = law.name + "'s formula gives a district an extra " + money(perStudent) + " for each " + law.who + " student. That is " +
@@ -939,6 +994,7 @@
     $("rankView").hidden = state.view !== "rank";
     if (state.view === "rank") { hideTip(); renderRanks(res); }
     if (state.step === 4) renderMoney(res);
+    else setTableWide(false);
     document.dispatchEvent(new CustomEvent("mam:update"));
     stickyCheck();
     return res;
@@ -961,6 +1017,11 @@
   }
 
   function wire() {
+    $("expandBtn").addEventListener("click", function () {
+      var on = !tableWide;
+      setTableWide(on);
+      if (!on) { $("fullDetails").open = true; $("fullDetails").scrollIntoView({ behavior: "smooth", block: "start" }); }
+    });
     ["MS", "TN"].forEach(function (s) {
       $("st-" + s).addEventListener("click", function () {
         if (state.st === s) return;

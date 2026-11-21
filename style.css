@@ -116,6 +116,17 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 8px; }
 ol.toplist { padding-left: 30px; margin: 0; columns: 2; column-gap: 28px; }
 ol.toplist li { padding: 2px 0; break-inside: avoid; font-size: 15px; }
+ol.toplist.one { columns: 1; }
+ol.toplist li.notin { font-weight: 700; }
+ol.toplist li.empty { list-style: none; color: var(--soft); }
+ul.cmpmoves { list-style: none; padding-left: 0; margin: 0; }
+ul.cmpmoves li { padding: 4px 0; border-bottom: 1px solid var(--rule); font-size: 15px; }
+.tabletools { margin: 0 0 8px; position: sticky; left: 0; }
+.tablewrap.wide { max-height: none; overflow-y: visible; }
+#wideTable .panel h2 { margin-top: 0; }
+#wideTable.wrap { max-width: none; }
+.tablewrap.wide th { white-space: normal; vertical-align: bottom; }
+.tablewrap.wide td:first-child { min-width: 180px; }
 ol.moves { padding-left: 0; list-style: none; margin: 0; }
 ol.moves li { padding: 5px 0; border-bottom: 1px solid var(--rule); font-size: 15px; }
 ol.moves .amt { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }

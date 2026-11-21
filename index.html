@@ -19,7 +19,7 @@
 <meta name="twitter:title" content="Measuring Access: Student Poverty in MS and TN">
 <meta name="twitter:description" content="Build an index of need for 277 Mississippi and Tennessee school districts and see how state poverty funding would move.">
 <meta name="twitter:image" content="https://measuringaccess.org/assets/share-card.png">
-<link rel="stylesheet" href="style.css?v=20261120a">
+<link rel="stylesheet" href="style.css?v=20261120b">
 </head>
 <body>
 <header class="top">
@@ -99,6 +99,17 @@
     <!-- Step 4 -->
     <div class="panel" data-step="4" hidden>
       <h2>Step 4. Follow the money</h2>
+      <h3>Your index next to the state's current count</h3>
+      <p class="muted small" id="cmpNote"></p>
+      <div class="two">
+        <div><h4>Top ten by the state's current poverty count</h4><ol class="toplist one" id="cmpNow"></ol></div>
+        <div><h4>Top ten by your index</h4><ol class="toplist one" id="cmpYours"></ol></div>
+      </div>
+      <div class="two">
+        <div><h4>Added to the top ten by your index</h4><ul class="plain cmpmoves" id="cmpAdded"></ul></div>
+        <div><h4>Dropped from the top ten by your index</h4><ul class="plain cmpmoves" id="cmpDropped"></ul></div>
+      </div>
+      <h3>The money</h3>
       <p id="fundIntro"></p>
       <div class="stats" id="fundStats"></div>
       <div class="two">
@@ -115,9 +126,9 @@
         </ol>
         <p id="fundNote" class="muted"></p>
       </details>
-      <details>
+      <details id="fullDetails">
         <summary>All districts</summary>
-        <div class="tablewrap"><table id="fullTable"></table></div>
+        <div id="fullHome"><div class="tablewrap" id="fullWrap"><p class="tabletools"><button type="button" class="ghost small" id="expandBtn" aria-controls="fullWrap">Expand table</button></p><table id="fullTable"></table></div></div>
       </details>
     </div>
 
@@ -165,6 +176,10 @@
     </div>
   </aside>
 </main>
+
+<section class="wrap" id="wideTable" hidden aria-label="All districts, full width">
+  <div class="panel"></div>
+</section>
 
 <section class="wrap" id="data" aria-labelledby="dataTitle">
   <div class="panel datapanel">
@@ -220,7 +235,7 @@
   <p>Built by John M. Fredericks, Arizona State University.</p>
 </footer>
 
-<script src="app.js?v=20261120a"></script>
-<script src="dl.js?v=20261120a"></script>
+<script src="app.js?v=20261120b"></script>
+<script src="dl.js?v=20261120b"></script>
 </body>
 </html>
