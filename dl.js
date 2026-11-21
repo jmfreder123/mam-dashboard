@@ -22,8 +22,8 @@
   function unitText(d) { return d.unitLabel ? d.unitLabel : d.unit === "%" ? " (%)" : d.unit === "$" ? " (2024 dollars)" : d.code === "gini" ? " (0 to 1)" : ""; }
 
   function indicatorsData(sel) {
-    // columns from data/indicators.csv, then food (data/food.csv) and housing (data/housing.csv)
-    var extra = ["foodkids_est", "foodkids_moe", "homeval_est", "homeval_moe", "proptax_est", "proptax_moe"];
+    // columns from data/indicators.csv, then food (data/food.csv), housing (data/housing.csv) and care (data/care.csv)
+    var extra = ["foodkids_est", "foodkids_moe", "homeval_est", "homeval_moe", "proptax_est", "proptax_moe", "care_est", "care_moe"];
     var head = Object.keys(M.raw.ind[0]).filter(function (k) { return extra.indexOf(k) < 0; }).concat(extra);
     var fixed = { state: "State", leaid: "Federal district ID (NCES LEA ID)", st_no: "State district number", name_census: "District name (Census)", district_type: "District type (Census)" };
     var cols = head.map(function (k) {
@@ -32,6 +32,7 @@
       var label;
       if (code === "kids617") label = isMoe ? "Margin of error (90%), children ages 6 to 17" : "Children ages 6 to 17 (count)";
       else if (code === "foodkids" && isMoe) label = "No margin of error published (USDA SRAM)";
+      else if (code === "care" && isMoe) label = "No margin of error (computed from road and clinic locations)";
       else label = isMoe ? "Margin of error (90%), " + d.label : d.label + unitText(d);
       return { name: k, label: label, type: "num" };
     });
@@ -44,7 +45,8 @@
       notes: [
         "Nineteen indicators are from the American Community Survey 2020-2024 5-year estimates, with margins of error at 90 percent. They describe everyone living in each district, not enrolled students. Median home value and median property taxes count lower values as more need on the dashboard.",
         "foodkids is from the USDA ERS SNAP-Authorized Retailer Access Map (July 2026 release, driving distance, stores as of June 2025, 2020 Census). It has no margin of error.",
-        "Made by 31_dashboard_indicators.do, 33_dashboard_food.do and 35_dashboard_housing.do. Sources, methods and file fingerprints are in the codebook and README."
+        "care is the average driving miles from children's homes to the nearest permanent HRSA community health center site (HRSA site list downloaded November 19, 2026, OpenStreetMap roads as of November 18, 2026, 2020 Census). It has no margin of error.",
+        "Made by 31_dashboard_indicators.do, 33_dashboard_food.do, 35_dashboard_housing.do and 38_dashboard_care.do (tract distances from 36_osm_clip.py and 37_care_drive.py). Sources, methods and file fingerprints are in the codebook and README."
       ]
     };
   }

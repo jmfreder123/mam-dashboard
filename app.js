@@ -12,7 +12,8 @@
     { code: "gini", domain: "income", label: "Gini index", unit: "", dir: 1, desc: "How spread out incomes are inside the district, from 0 (equal) to 1.", note: "This measures inequality, not how many families are poor. Here, higher counts as more need." },
     { code: "foodkids", domain: "food", label: "Kids far from a SNAP store", unit: "%", dir: 1, desc: "Children 0 to 17 who live more than 1 mile (town) or 10 miles (rural) by road from a store that takes SNAP.", note: "From USDA store locations (2025) and the 2020 Census, not the ACS. No margin of error." },
     { code: "snap", domain: "food", label: "SNAP households", unit: "%", dir: 1, desc: "Households that received SNAP (food stamps) in the past 12 months." },
-    { code: "unins", domain: "needs", label: "Kids uninsured", unit: "%", dir: 1, desc: "Children under 19 with no health insurance." },
+    { code: "unins", domain: "health", label: "Kids uninsured", unit: "%", dir: 1, desc: "Children under 19 with no health insurance." },
+    { code: "care", domain: "health", label: "Miles to a health center", unit: "mi", unitLabel: " (miles)", dir: 1, desc: "Average driving miles from children's homes to the nearest community health center (a federally funded clinic).", note: "From HRSA clinic locations (2026) and OpenStreetMap roads, not the ACS. Counts only community health centers, not every doctor's office. No margin of error." },
     { code: "crowd", domain: "needs", label: "Crowded housing", unit: "%", dir: 1, desc: "Households with more than one person per room." },
     { code: "plumb", domain: "needs", label: "No complete plumbing", unit: "%", dir: 1, desc: "Households lacking complete plumbing." },
     { code: "rentburden", domain: "needs", label: "Rent burden", unit: "%", dir: 1, desc: "Renter households paying 35 percent or more of income on rent." },
@@ -31,7 +32,8 @@
   var DOMAINS = [
     { key: "income", label: "Income and work" },
     { key: "food", label: "Food" },
-    { key: "needs", label: "Health and housing" },
+    { key: "health", label: "Health" },
+    { key: "needs", label: "Housing" },
     { key: "access", label: "Getting around and getting online" },
     { key: "family", label: "Family and language" }
   ];
@@ -79,6 +81,7 @@
     var u = BY[code].unit;
     if (u === "$") return "$" + fmtN(x, 0);
     if (u === "%") return fmtN(x, 1) + "%";
+    if (u === "mi") return fmtN(x, 1) + " mi";
     return fmtN(x, 3);
   }
   function money(x) { var s = "$" + fmtN(Math.abs(x), 0); return x < 0 ? "−" + s : s; }
@@ -113,7 +116,7 @@
     return rows.map(function (r) { var o = {}; h.forEach(function (k, j) { o[k] = r[j]; }); return o; });
   }
 
-  function build(dist, ind, food, housing) {
+  function build(dist, ind, food, housing, care) {
     var byId = {};
     ind.forEach(function (r) { byId[r.leaid] = r; });
     // food access comes from its own file (decision D073); its moe column is empty
@@ -125,6 +128,11 @@
     housing.forEach(function (r) {
       var x = byId[r.leaid];
       if (x) { x.homeval_est = r.homeval_est; x.homeval_moe = r.homeval_moe; x.proptax_est = r.proptax_est; x.proptax_moe = r.proptax_moe; }
+    });
+    // distance to care comes from its own file (decision D078); its moe column is empty
+    care.forEach(function (r) {
+      var x = byId[r.leaid];
+      if (x) { x.care_est = r.care_est; x.care_moe = r.care_moe; }
     });
     dist.forEach(function (d) {
       var x = byId[d.leaid];
@@ -1071,11 +1079,12 @@
     fetch("data/map.geojson").then(function (r) { return r.json(); }),
     fetch("data/food.csv").then(function (r) { return r.text(); }),
     fetch("data/neighbors.csv").then(function (r) { return r.text(); }),
-    fetch("data/housing.csv").then(function (r) { return r.text(); })
+    fetch("data/housing.csv").then(function (r) { return r.text(); }),
+    fetch("data/care.csv").then(function (r) { return r.text(); })
   ]).then(function (x) {
     parseCSV(x[4]).forEach(function (r) { (NBR[r.leaid] = NBR[r.leaid] || []).push(r.neighbor_leaid); });
-    RAW.dist = parseCSV(x[0]); RAW.ind = parseCSV(x[1]); RAW.food = parseCSV(x[3]); RAW.housing = parseCSV(x[5]); RAW.map = x[2];
-    build(RAW.dist, RAW.ind, RAW.food, RAW.housing);
+    RAW.dist = parseCSV(x[0]); RAW.ind = parseCSV(x[1]); RAW.food = parseCSV(x[3]); RAW.housing = parseCSV(x[5]); RAW.care = parseCSV(x[6]); RAW.map = x[2];
+    build(RAW.dist, RAW.ind, RAW.food, RAW.housing, RAW.care);
     FEATURES.MS = x[2].features.filter(function (f) { return f.properties.leaid.slice(0, 2) === "28"; });
     FEATURES.TN = x[2].features.filter(function (f) { return f.properties.leaid.slice(0, 2) === "47"; });
     load();

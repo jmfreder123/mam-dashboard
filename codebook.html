@@ -19,7 +19,7 @@
 <meta name="twitter:title" content="Measuring Access Codebook">
 <meta name="twitter:description" content="What every variable in the Measuring Access dashboard means, how it was built, and where it comes from.">
 <meta name="twitter:image" content="https://measuringaccess.org/assets/share-card.png">
-<link rel="stylesheet" href="style.css?v=20261119e">
+<link rel="stylesheet" href="style.css?v=20261120a">
 <style>
   .cb h2 { margin-top: 8px; }
   .cb h3 { margin-top: 22px; }
@@ -45,7 +45,7 @@
 <main class="wrap cb">
   <div class="panel">
     <p><a href="./">Back to the dashboard</a></p>
-    <p>This codebook covers every column in the dashboard's downloads. Each variable lists its name in the file, what it holds in plain words, how it was built, its source, and the numbered decision behind it. The decision numbers (D061 to D077) refer to the MAM census database's decision log.</p>
+    <p>This codebook covers every column in the dashboard's downloads. Each variable lists its name in the file, what it holds in plain words, how it was built, its source, and the numbered decision behind it. The decision numbers (D061 to D078) refer to the MAM census database's decision log.</p>
     <ol class="toc">
       <li><a href="#pipeline">How the data were built</a></li>
       <li><a href="#units">Districts and IDs</a></li>
@@ -62,8 +62,8 @@
     <h2>How the data were built</h2>
     <p>Every step reads only files whose fingerprint (SHA-256) matches the one recorded when the file was downloaded or made. A step stops if any input does not match, and it never overwrites a file.</p>
     <ol>
-      <li><strong>Download.</strong> <code>01_download_acs.sh</code> pulls American Community Survey 5-year tables from the Census Data API for Mississippi and Tennessee school districts. The dashboard uses the 2020-2024 estimates. Other downloads: Census TIGER/Line 2024 school district boundaries (<code>04_download_tiger.sh</code>), Tennessee district profiles (<code>05_download_state_files.sh</code>, saved from a browser when the site refused scripted downloads), and, saved from a browser, the Mississippi enrollment file, the Mississippi school meals (CEP) list, the NCES directory, and USDA's SNAP-Authorized Retailer Access Map.</li>
-      <li><strong>Clean.</strong> <code>10_build_acs_long.R</code> turns each raw ACS file into a long table with one row per district and variable: the estimate, its 90% margin of error, and any Census special code (D067).</li>
+      <li><strong>Download.</strong> <code>01_download_acs.sh</code> pulls American Community Survey 5-year tables from the Census Data API for Mississippi and Tennessee school districts. The dashboard uses the 2020-2024 estimates. Other downloads: Census TIGER/Line 2024 school district boundaries (<code>04_download_tiger.sh</code>), Tennessee district profiles (<code>05_download_state_files.sh</code>, saved from a browser when the site refused scripted downloads), and, saved from a browser, the Mississippi enrollment file, the Mississippi school meals (CEP) list, the NCES directory, USDA's SNAP-Authorized Retailer Access Map, HRSA's list of health center sites, the Census 2020 tract centers of population, and OpenStreetMap road files from Geofabrik.</li>
+      <li><strong>Clean.</strong> <code>10_build_acs_long.R</code> turns each raw ACS file into a long table with one row per district and variable: the estimate, its 90% margin of error, and any Census special code (D067). Two Python steps make the tract driving distances to health centers: <code>36_osm_clip.py</code> cuts the road files to Mississippi, Tennessee and a 75-mile border, and <code>37_care_drive.py</code> finds each tract's driving miles to the nearest site (D078).</li>
       <li><strong>Build.</strong> Stata 19 do-files make the dashboard's data (D067):
         <ul>
           <li><code>30_dashboard_districts.do</code>: the 277 districts, their IDs, K-12 enrollment, and who the state counts now.</li>
@@ -72,6 +72,7 @@
           <li><code>33_dashboard_food.do</code>: the food access indicator.</li>
           <li><code>34_dashboard_neighbors.do</code>: which districts border each other.</li>
           <li><code>35_dashboard_housing.do</code>: median home value and property taxes.</li>
+          <li><code>38_dashboard_care.do</code>: distance to a community health center.</li>
         </ul>
       </li>
       <li><strong>Check.</strong> Each product was recomputed separately in Python, cell by cell, before it went on the dashboard.</li>
@@ -141,10 +142,16 @@
       <tr><td><code>snap</code></td><td>Households that received SNAP (food stamps) in the past 12 months (%)</td><td>As published.</td><td class="src">ACS S2201_C04_001</td><td class="dec">D061, D069</td></tr>
     </table></div>
 
-    <h3>Health and housing</h3>
+    <h3>Health</h3>
     <div class="dtablewrap"><table class="dtable">
       <tr><th>Name in file</th><th>What it is</th><th>How it was built</th><th>Source</th><th>Decision</th></tr>
       <tr><td><code>unins</code></td><td>Kids under 19 with no health insurance (%)</td><td>As published.</td><td class="src">ACS S2701_C05_011</td><td class="dec">D069</td></tr>
+      <tr><td><code>care</code></td><td>Average driving miles from children's homes (ages 0 to 17) to the nearest community health center</td><td>Sites are active, permanent HRSA health center sites (federally qualified health centers and look-alikes) that see patients, in clinic or school settings, including sites in neighboring states. For each census tract, driving miles run from the tract's 2020 center of population over OpenStreetMap roads, using the published OSMnx "drive" rule (no footpaths, farm tracks, service roads, parking aisles or private roads) and following one-way streets. Points are matched only to roads that are not interstates or ramps, and the straight-line gaps from the point to the road and from the road to the site are added. District value = average of its tracts' miles, weighted by each tract's kids (2020 Census) times the share of the tract's people living in the district. Higher counts as more need. This is distance to the safety net, not to every doctor's office. A check of 22 routes against the OSRM router matched closely, except where OSRM used farm tracks or service roads that the drive rule leaves out. No margin of error.</td><td class="src">HRSA Health Center Service Delivery and Look-Alike Sites (downloaded November 19, 2026). OpenStreetMap roads (Geofabrik extracts dated November 18, 2026). Census 2020 tract centers of population. Kids counts from USDA SRAM (TractKids). Team tract-to-district crosswalk (share_of_tract_pop).</td><td class="dec">D078</td></tr>
+    </table></div>
+
+    <h3>Housing</h3>
+    <div class="dtablewrap"><table class="dtable">
+      <tr><th>Name in file</th><th>What it is</th><th>How it was built</th><th>Source</th><th>Decision</th></tr>
       <tr><td><code>crowd</code></td><td>Households with more than 1 person per room (%)</td><td>Built from counts. Numerator: owner and renter households with 1.01 to 1.50, 1.51 to 2.00, or 2.01 or more people per room. Denominator: all occupied housing units. Times 100.</td><td class="src">ACS B25014_005, _006, _007, _011, _012, _013, over B25014_001</td><td class="dec">D069</td></tr>
       <tr><td><code>plumb</code></td><td>Households lacking complete plumbing (%)</td><td>Built from counts. Numerator: owner and renter households lacking plumbing facilities. Denominator: all occupied housing units. Times 100.</td><td class="src">ACS B25049_004 + _007, over B25049_001</td><td class="dec">D069</td></tr>
       <tr><td><code>rentburden</code></td><td>Renter households paying 35% or more of income on rent (%)</td><td>Built from counts. Numerator: renters paying 35.0 to 39.9%, 40.0 to 49.9%, or 50% or more. Denominator: all renter households minus those whose share could not be computed. Times 100.</td><td class="src">ACS B25070_008 + _009 + _010, over B25070_001 minus B25070_011</td><td class="dec">D069</td></tr>
@@ -249,6 +256,7 @@
       <tr><td><code>map.geojson</code></td><td><code>32_dashboard_map.do</code></td><td><code>1101a3c55047a759cff6ddda4b04fe54520e19779fc23b4d85456ebddb90cc02</code></td></tr>
       <tr><td><code>food.csv</code></td><td><code>33_dashboard_food.do</code></td><td><code>09e699a888f049d0f6bae32380924b46135f9444dec8a0bb8c8c63355933f6ef</code></td></tr>
       <tr><td><code>housing.csv</code></td><td><code>35_dashboard_housing.do</code></td><td><code>e9104cdecfcc7991319195ea2dad9f618696b577d2d0e159f371785f4af7a0c2</code></td></tr>
+      <tr><td><code>care.csv</code></td><td><code>38_dashboard_care.do</code></td><td><code>61bbe10468334277eeedc2e4b4fe9bcd23ea6f8e26e299dc96113801507a6a7e</code></td></tr>
       <tr><td><code>neighbors.csv</code></td><td><code>34_dashboard_neighbors.do</code></td><td><code>06b550f90b61e61bfc12ec76f108aabd5f7dbe9e7cc511350d69a2a27ad19574</code></td></tr>
     </table></div>
     <p>Full sources, with links, are in the <a href="https://github.com/jmfreder123/mam-dashboard#readme">README</a>.</p>

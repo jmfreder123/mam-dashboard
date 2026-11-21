@@ -8,7 +8,7 @@ It is a static page. Nothing is installed, and nothing a user enters leaves thei
 
 Each state is ranked on its own. Users go through four steps after a short introduction. Clicking a step's name at the top opens it, and a step opens only once the steps before it are complete (at least two indicators, and weights that add up to 100):
 
-1. **Indicators.** Pick four to six of 20 indicators. The page flags pairs that move closely together (correlation of 0.8 or more within the state), since counting both gives that idea extra weight.
+1. **Indicators.** Pick four to six of 21 indicators. The page flags pairs that move closely together (correlation of 0.8 or more within the state), since counting both gives that idea extra weight.
 2. **Weights.** Split 100 points among the chosen indicators.
 3. **Scaling.** Choose ranks, 0 to 100, or z-scores. A small table shows how five districts score under each method.
 4. **Money.** See which districts would gain or lose poverty-weight dollars.
@@ -25,7 +25,7 @@ The full district table in the money step also shows each district's rank now, i
 
 Clicking a district on the map (or selecting it with the keyboard and pressing Enter) zooms the map to that district and the districts that border it. A short panel under the map shows its basic facts, how it does under the user's index, and its bordering districts, which can be clicked in turn. "Whole state" or the Escape key zooms back out.
 
-The panel opens a full district page in place of the steps. It shows all 20 indicators with the district's value, margin of error, the state median and its need rank on each (1 is the most need, and equal values share a rank), plus a table comparing it with its bordering districts. Each district page has its own link, for example `#district-2800750`.
+The panel opens a full district page in place of the steps. It shows all 21 indicators with the district's value, margin of error, the state median and its need rank on each (1 is the most need, and equal values share a rank), plus a table comparing it with its bordering districts. Each district page has its own link, for example `#district-2800750`.
 
 Bordering districts come from `data/neighbors.csv`. Two districts border each other if they are in the same state and share at least 0.00001 degrees (about 1 meter) of border in the full 2024 TIGER/Line boundaries. Districts that touch only at a corner do not count. The full boundaries are used because working this out from the simplified map shapes gave 16 wrong pairs out of 655.
 
@@ -85,7 +85,7 @@ A **Choose columns** box lets them keep only some columns, grouped like the indi
 
 Every file is built in the browser from the files in `data/`. Nothing is sent anywhere.
 
-- **Indicators:** the columns of `data/indicators.csv` plus food access from `data/food.csv` and median home value and property taxes from `data/housing.csv`. The CSV keeps the numbers exactly as they are written in those files.
+- **Indicators:** the columns of `data/indicators.csv` plus food access from `data/food.csv`, median home value and property taxes from `data/housing.csv`, and distance to a health center from `data/care.csv`. The CSV keeps the numbers exactly as they are written in those files.
 - **Funding inputs:** the columns of `data/districts.csv` plus the funding rules in law for each state (formula, year, base amount, poverty weight, concentrated poverty weight and line).
 - **Your results:** for each district, the value, scaled value and weight of each chosen indicator, the scaling method, the index, rank now, rank under the index, places moved, students counted now and after re-sharing, poverty-weight dollars now and after, and the change in total and per student. With both states, each state is still ranked on its own.
 - **Map boundaries:** the features of `data/map.geojson` for the chosen state.
@@ -103,7 +103,7 @@ There are 277 districts: the school systems each state's formula pays.
 
 ## Indicators
 
-Nineteen indicators come from the ACS 2020-2024 5-year estimates. Food access comes from USDA. The indicators are grouped into five domains for now. These will be renamed to MAM domains as more domains are added.
+Nineteen indicators come from the ACS 2020-2024 5-year estimates. Food access comes from USDA. Distance to a health center comes from HRSA's site list and OpenStreetMap roads. The indicators are grouped into six domains for now. These will be renamed to MAM domains as more domains are added.
 
 | Domain | Indicator | Source |
 |---|---|---|
@@ -114,13 +114,14 @@ Nineteen indicators come from the ACS 2020-2024 5-year estimates. Food access co
 | Income and work | Gini index | B19083_001 |
 | Food | Kids far from a SNAP store, ages 0 to 17 | USDA ERS SRAM, driving distance (see below) |
 | Food | SNAP households | S2201_C04_001 |
-| Health and housing | Kids uninsured, under 19 | S2701_C05_011 |
-| Health and housing | Crowded housing (more than 1 person per room) | B25014, built |
-| Health and housing | No complete plumbing | B25049, built |
-| Health and housing | Rent burden (35% or more of income) | B25070, built ("not computed" left out) |
-| Health and housing | Median home value (lower counts as more need) | B25077_001 |
-| Health and housing | Median property taxes (lower counts as more need) | B25103_001 |
-| Health and housing | Moved in the past year | B07003, built |
+| Health | Kids uninsured, under 19 | S2701_C05_011 |
+| Health | Driving miles to a community health center, ages 0 to 17 | HRSA sites and OpenStreetMap roads (see below) |
+| Housing | Crowded housing (more than 1 person per room) | B25014, built |
+| Housing | No complete plumbing | B25049, built |
+| Housing | Rent burden (35% or more of income) | B25070, built ("not computed" left out) |
+| Housing | Median home value (lower counts as more need) | B25077_001 |
+| Housing | Median property taxes (lower counts as more need) | B25103_001 |
+| Housing | Moved in the past year | B07003, built |
 | Getting around and getting online | No vehicle | S2504_C02_027 |
 | Getting around and getting online | No broadband | 100 − S2801_C02_014 |
 | Getting around and getting online | No computer | S2801_C02_011 |
@@ -142,6 +143,18 @@ The share of kids 0 to 17 who live far from a store that takes SNAP. Far means m
 - **No margin of error:** USDA publishes none. The `foodkids_moe` column is empty.
 - **Zeros:** six districts are at 0: Nettleton and South Pike in Mississippi, and Fayetteville City, Bradford, Trenton and West Carroll in Tennessee.
 
+### Distance to a health center
+
+The average driving miles from children's homes (ages 0 to 17) to the nearest community health center.
+
+- **Sites:** HRSA's Health Center Service Delivery and Look-Alike Sites, downloaded November 19, 2026. Active, permanent sites that see patients, in clinic or school settings. Sites in neighboring states count.
+- **Roads:** OpenStreetMap, Geofabrik state extracts dated November 18, 2026, for Mississippi, Tennessee and eight neighboring states, cut to a box 75 miles around Mississippi and Tennessee (`36_osm_clip.py`). A road counts if the OSMnx 2.2.0 "drive" rule allows it, so footpaths, farm tracks, service roads, parking aisles and private roads are left out. One-way streets are followed one way.
+- **Tracts:** driving miles from each 2020 Census tract center of population to the nearest site (`37_care_drive.py`). Points are matched only to roads that are not interstates or ramps. The straight-line gaps from the point to the road and from the road to the site are added.
+- **Tracts to districts:** the average of the district's tracts, weighted by each tract's kids (2020 Census, from SRAM) times the share of its people living in the district (`38_dashboard_care.do`).
+- **What it shows:** distance to the safety net, not to every doctor's office. Higher counts as more need.
+- **Check:** 22 routes were compared with the OSRM router. They matched closely, except where OSRM used farm tracks or service roads that the drive rule leaves out.
+- **No margin of error:** the `care_moe` column is empty.
+
 ## Data files
 
 The files in `data/` are exact copies of products from the MAM census database. Each one was made by a logged Stata 19 do-file and checked against an independent recomputation.
@@ -154,12 +167,16 @@ The files in `data/` are exact copies of products from the MAM census database. 
 | `data/food.csv` | `33_dashboard_food.do`, run dashfood_20261119T164127Z | `09e699a888f049d0f6bae32380924b46135f9444dec8a0bb8c8c63355933f6ef` |
 | `data/neighbors.csv` | `34_dashboard_neighbors.do`, run dashnbr_20261119T180245Z | `06b550f90b61e61bfc12ec76f108aabd5f7dbe9e7cc511350d69a2a27ad19574` |
 | `data/housing.csv` | `35_dashboard_housing.do`, run dashhouse_20261119T200703Z | `e9104cdecfcc7991319195ea2dad9f618696b577d2d0e159f371785f4af7a0c2` |
+| `data/care.csv` | `38_dashboard_care.do`, run dashcare_20261121T015654Z | `61bbe10468334277eeedc2e4b4fe9bcd23ea6f8e26e299dc96113801507a6a7e` |
 
 Sources behind them:
 
 - U.S. Census Bureau, American Community Survey 2020-2024 5-year estimates, Census Data API.
 - USDA Economic Research Service, [SNAP-Authorized Retailer Access Map data](https://www.ers.usda.gov/media/29395/2025-snap-authorized-retailer-access-map-sram-data.zip?v=84679), July 2026 release.
 - MAM team tract-to-district population shares, 2024 school district boundaries, built from 2020 Census blocks.
+- HRSA, [Health Center Service Delivery and Look-Alike Sites](https://data.hrsa.gov/data/download), downloaded November 19, 2026.
+- U.S. Census Bureau, 2020 centers of population by census tract ([Mississippi](https://www2.census.gov/geo/docs/reference/cenpop2020/tract/CenPop2020_Mean_TR28.txt), [Tennessee](https://www2.census.gov/geo/docs/reference/cenpop2020/tract/CenPop2020_Mean_TR47.txt)).
+- OpenStreetMap contributors, state extracts from [Geofabrik](https://download.geofabrik.de/north-america/us.html), dated November 18, 2026 (ODbL 1.0).
 - Tennessee Department of Education, district profile 2024-25 ([data downloads](https://www.tn.gov/education/districts/federal-programs-and-oversight/data/data-downloads.html)).
 - Mississippi Department of Education:
   - [Enrollment data download](https://newreports.mdek12.org/DataDownload)
@@ -171,14 +188,14 @@ Sources behind them:
   - [Mississippi Student Funding Formula, TPC](https://tpcref.org/mississippi-student-funding-formula/)
   - [George County School District FY26 budget hearing](https://irp.cdn-website.com/5877256e/files/uploaded/2025-2026+Public+Hearing+July+29-+2025.pdf)
 
-The decisions behind these choices are numbered D063 to D075 in the database's decision log.
+The decisions behind these choices are numbered D063 to D078 in the database's decision log.
 
 ## Files
 
 - `index.html`, `style.css`, `app.js`: the page
 - `dl.js`: the downloads (CSV, Excel, Stata and JSON writers)
 - `codebook.html`: what every variable means, how it was built, its source and the decision behind it
-- `data/`: the six data files above
+- `data/`: the seven data files above
 
 The page loads `style.css`, `app.js` and `dl.js` with a version tag (`?v=...`). Change the tag whenever one of those files changes, so browsers fetch the new copy instead of an old saved one.
 
