@@ -500,9 +500,9 @@
       { key: "moved", head: "Moved", n: true, get: function (o) { return o.curRank - o.rank; }, show: function (o) { return movedText(o.curRank - o.rank); } },
       { key: "enroll", head: "K-12 students", n: true, get: function (o) { return o.r.enroll; }, show: function (o) { return fmtN(o.r.enroll); } },
       { key: "curPct", head: "State's current poverty count", n: true, get: function (o) { return o.curCount / o.r.enroll; }, show: function (o) { return fmtN(100 * o.curCount / o.r.enroll, 1) + "%"; } },
-      { key: "newPct", head: "Under your index", n: true, get: function (o) { return o.newCount / o.r.enroll; }, show: function (o) { return fmtN(100 * o.newCount / o.r.enroll, 1) + "%"; } },
+      { key: "newPct", head: "Share under your index", n: true, get: function (o) { return o.newCount / o.r.enroll; }, show: function (o) { return fmtN(100 * o.newCount / o.r.enroll, 1) + "%"; } },
       { key: "cur", head: "Dollars now", n: true, get: function (o) { return o.curDollars; }, show: function (o) { return money(o.curDollars); } },
-      { key: "new", head: "Under your index", n: true, get: function (o) { return o.newDollars; }, show: function (o) { return money(o.newDollars); } },
+      { key: "new", head: "Dollars under your index", n: true, get: function (o) { return o.newDollars; }, show: function (o) { return money(o.newDollars); } },
       { key: "change", head: "Change", n: true, get: function (o) { return o.change; }, show: function (o) { return moneySigned(o.change); } },
       { key: "per", head: "Per student", n: true, get: function (o) { return o.perStudent; }, show: function (o) { return moneySigned(o.perStudent); } }
     ];
