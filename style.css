@@ -165,6 +165,9 @@ details.how ol { padding-left: 22px; }
 .distpanel { border-top: 1px solid var(--rule); margin-top: 12px; padding-top: 12px; }
 .dphead { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
 .dphead h3, .dphead h2 { margin: 0; }
+.dpbtns { display: flex; gap: 8px; flex-wrap: wrap; }
+a.distlink { color: inherit; text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: 3px; }
+a.distlink:hover, a.distlink:focus-visible { color: var(--accent); text-decoration-color: currentColor; }
 .facts { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 10px 0; font-size: 15px; }
 .facts dt { color: var(--soft); }
 .facts dd { margin: 0; font-variant-numeric: tabular-nums; }

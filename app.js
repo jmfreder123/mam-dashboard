@@ -396,6 +396,33 @@
     box.appendChild(wrap);
   }
 
+  // A district name that, when clicked, shows the district on the map
+  function distLink(o, text) {
+    return el("a", { href: "#mapView", class: "distlink", "data-leaid": o.r.leaid, title: "Show on the map" }, text || o.r.name);
+  }
+  var cameFrom = null;   // where the reader clicked a district name, to go back to
+  function showFromLink(btn) {
+    var leaid = btn.getAttribute("data-leaid");
+    cameFrom = { y: window.scrollY, leaid: leaid, list: btn.closest("[id]") ? btn.closest("[id]").id : null, view: state.view };
+    if (state.view === "rank") { state.view = "index"; updateLive(); save(); }
+    focusDistrict(leaid);
+    // show the bottom of the map and the district's facts under it
+    // (the district sits near the middle of the map, the panel's buttons just under it)
+    var panelTop = $("distPanel").getBoundingClientRect().top + window.scrollY;
+    var mapTop = $("mapView").getBoundingClientRect().top + window.scrollY;
+    window.scrollTo({ top: Math.max(0, mapTop - 12, panelTop - window.innerHeight + 170), behavior: "smooth" });
+  }
+  function goBack() {
+    var c = cameFrom; cameFrom = null;
+    renderDistPanel();
+    if (!c) return;
+    if (c.view !== state.view) { state.view = c.view; updateLive(); if (c.view !== "rank") sizeMap(false); save(); }
+    window.scrollTo({ top: c.y, behavior: "smooth" });
+    var list = c.list && document.getElementById(c.list);
+    var b = list && list.querySelector('.distlink[data-leaid="' + c.leaid + '"]');
+    if (b) b.focus({ preventScroll: true });
+  }
+
   // Step 4: the state's current top ten next to the user's, as in the Arizona lab
   function renderCompare(res) {
     var now = $("cmpNow"), yours = $("cmpYours"), add = $("cmpAdded"), drop = $("cmpDropped");
@@ -403,7 +430,7 @@
     var law = LAW[state.st], R = res.rows;
     function nm(o) { return o.r.name + (o.r.type !== "unified" ? " (city K-8)" : ""); }
     var topNow = R.slice().sort(function (a, b) { return a.curRank - b.curRank; }).slice(0, 10);
-    topNow.forEach(function (o) { now.appendChild(el("li", { "data-leaid": o.r.leaid }, nm(o))); });
+    topNow.forEach(function (o) { var li = el("li", { "data-leaid": o.r.leaid }); li.appendChild(distLink(o, nm(o))); now.appendChild(li); });
     if (!res.ok) {
       $("cmpNote").textContent = "Left: the ten " + law.name + " districts with the highest share of students in the state's current poverty count (" + law.measure + "). Choose indicators and weights to see your top ten beside it.";
       yours.appendChild(el("li", { class: "empty" }, "Choose indicators first."));
@@ -415,13 +442,13 @@
       if (idsYours.indexOf(idsNow[i]) < 0) { li.className = "notin"; li.title = "Not in your top ten"; }
     });
     topYours.forEach(function (o) {
-      var li = el("li", { "data-leaid": o.r.leaid }, nm(o));
+      var li = el("li", { "data-leaid": o.r.leaid }); li.appendChild(distLink(o, nm(o)));
       if (idsNow.indexOf(o.r.leaid) < 0) { li.className = "notin"; li.title = "Not in the state's current top ten"; }
       yours.appendChild(li);
     });
     var both = topYours.filter(function (o) { return idsNow.indexOf(o.r.leaid) >= 0; }).length;
     $("cmpNote").textContent = both + " of 10 districts are in both top tens. Names in bold are not in the other list. The state's current count is " + law.measure + ".";
-    function item(o) { return el("li", null, nm(o) + ": rank now " + o.curRank + ", your rank " + o.rank); }
+    function item(o) { var li = el("li"); li.appendChild(distLink(o, nm(o))); li.appendChild(document.createTextNode(": rank now " + o.curRank + ", your rank " + o.rank)); return li; }
     var added = topYours.filter(function (o) { return idsNow.indexOf(o.r.leaid) < 0; });
     var dropped = topNow.filter(function (o) { return idsYours.indexOf(o.r.leaid) < 0; });
     if (added.length) added.forEach(function (o) { add.appendChild(item(o)); }); else add.appendChild(el("li", null, "None. Your top ten has the same districts."));
@@ -485,7 +512,7 @@
     var byGain = R.slice().sort(function (a, b) { return b.change - a.change; });
     function moveItem(o) {
       var li = el("li");
-      li.appendChild(el("span", null, o.r.name + " "));
+      li.appendChild(distLink(o)); li.appendChild(document.createTextNode(" "));
       li.appendChild(el("span", { class: "amt " + (o.change >= 0 ? "up" : "down") }, moneySigned(o.change)));
       li.appendChild(el("span", { class: "muted" }, " (" + moneySigned(o.perStudent) + " per student)"));
       return li;
@@ -522,7 +549,8 @@
     }).forEach(function (o) {
       var tr = el("tr");
       cols.forEach(function (c) {
-        var td = el("td", { class: c.n ? "n" : "" }, c.show(o));
+        var td = c.key === "name" ? el("td") : el("td", { class: c.n ? "n" : "" }, c.show(o));
+        if (c.key === "name") td.appendChild(distLink(o, c.show(o)));
         if (c.key === "change" || c.key === "per") td.className += o.change > 0.5 ? " up" : o.change < -0.5 ? " down" : "";
         tr.appendChild(td);
       });
@@ -656,7 +684,7 @@
     var ol = $("topList"); ol.innerHTML = "";
     if (!res.ok) { ol.appendChild(el("li", null, "Choose indicators to rank districts.")); return; }
     res.rows.slice().sort(function (a, b) { return a.rank - b.rank; }).slice(0, 10).forEach(function (o) {
-      ol.appendChild(el("li", null, o.r.name));
+      var li = el("li"); li.appendChild(distLink(o)); ol.appendChild(li);
     });
   }
 
@@ -782,6 +810,7 @@
   }
   function clearFocus() {
     focusId = null;
+    cameFrom = null;
     markMap();
     animateVB(baseVB());
     atHome = false;
@@ -826,9 +855,16 @@
     box.innerHTML = "";
     var head = el("div", { class: "dphead" });
     head.appendChild(el("h3", null, o.r.name));
+    var btns = el("div", { class: "dpbtns" });
+    if (cameFrom) {
+      var back = el("button", { type: "button", class: "small" }, "Back to the list");
+      back.addEventListener("click", goBack);
+      btns.appendChild(back);
+    }
     var out = el("button", { type: "button", class: "ghost small" }, "Whole state");
     out.addEventListener("click", clearFocus);
-    head.appendChild(out);
+    btns.appendChild(out);
+    head.appendChild(btns);
     box.appendChild(head);
     box.appendChild(factsList(o));
     box.appendChild(el("h4", null, "Under your index"));
@@ -1017,6 +1053,10 @@
   }
 
   function wire() {
+    document.addEventListener("click", function (e) {
+      var b = e.target.closest && e.target.closest(".distlink");
+      if (b) { e.preventDefault(); showFromLink(b); }
+    });
     $("expandBtn").addEventListener("click", function () {
       var on = !tableWide;
       setTableWide(on);
